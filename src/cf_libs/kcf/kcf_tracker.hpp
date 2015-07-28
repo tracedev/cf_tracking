@@ -55,7 +55,7 @@ References:
 PAMI, 2015.
 
 [2] M. Danelljan, et al.,
-“Adaptive Color Attributes for Real-Time Visual Tracking,”
+ï¿½Adaptive Color Attributes for Real-Time Visual Tracking,ï¿½
 in Proc. CVPR, 2014.
 
 [3] M. Danelljan,
@@ -63,7 +63,7 @@ in Proc. CVPR, 2014.
 Proceedings of the British Machine Vision Conference BMVC, 2014.
 
 [4] D. Bolme, et al.,
-“Visual Object Tracking using Adaptive Correlation Filters,”
+ï¿½Visual Object Tracking using Adaptive Correlation Filters,ï¿½
 in Proc. CVPR, 2010.
 */
 
@@ -90,9 +90,9 @@ namespace cf_tracking
 {
     struct KcfParameters
     {
-        double padding = 1.7;
+        double padding = 1.5;
         double lambda = 0.0001;
-        double outputSigmaFactor = 0.05;
+        double outputSigmaFactor = 0.1;
         double votScaleStep = 1.05;
         double votScaleWeight = 0.95;
         int templateSize = 100;
@@ -101,12 +101,12 @@ namespace cf_tracking
         int cellSize = 4;
         int pixelPadding = 0;
 
-        bool enableTrackingLossDetection = false;
+        bool enableTrackingLossDetection = true;
         double psrThreshold = 13.5;
         int psrPeakDel = 1;
 
-        bool useVotScaleEstimation = false;
-        bool useDsstScaleEstimation = true;
+        bool useVotScaleEstimation = true;
+        bool useDsstScaleEstimation = false;
         double scaleSigmaFactor = static_cast<double>(0.25);
         double scaleEstimatorStep = static_cast<double>(1.02);
         double scaleLambda = static_cast<double>(0.01);
@@ -868,10 +868,6 @@ namespace cf_tracking
             idft(responsef, response, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
             return true;
         }
-
-    private:
-        KcfTracker& operator=(const KcfTracker&)
-        {}
 
     private:
         typedef cv::Mat(KcfTracker::*correlatePtr)(const std::shared_ptr<FFC>&,

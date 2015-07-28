@@ -29,7 +29,7 @@
 
 project(CfTracking)
 
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 2.8)
 
 # option to enable OpenMP; only relevant for the KCF version with the
 # VOT scale estimation
@@ -42,38 +42,25 @@ if(WITH_OPENMP)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif(WITH_OPENMP)
 
-# add c++11 support
-if(CMAKE_COMPILER_IS_GNUCC)
-    ADD_DEFINITIONS ( -std=c++11 )
-endif(CMAKE_COMPILER_IS_GNUCC)
-
 # add OpenCV
-set(OPENCV_DIR_HINT "")
-
-if(WIN32)
-    get_filename_component(OPENCV_DIR_PLATFORM $ENV{OPENCV_DIR} DIRECTORY)
-    get_filename_component(OPENCV_DIR_HINT ${OPENCV_DIR_PLATFORM} DIRECTORY)
-endif(WIN32)
-
-set(OpenCV_STATIC OFF)
-find_package(OpenCV REQUIRED HINTS ${OPENCV_DIR_HINT})
+find_package(OpenCV REQUIRED)
 
 # add 3rdparty source
-set(CF_TCLAP_DIR "src/3rdparty/tclap")
-set(CF_CV_EXT_DIR "src/3rdparty/cv_ext")
-set(CF_PIOTR_DIR "src/3rdparty/piotr")
+set(CF_TCLAP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/tclap")
+set(CF_CV_EXT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/cv_ext")
+set(CF_PIOTR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/piotr")
 
-include_directories(${OpenCV_DIR}/include)
-include_directories(${CF_TCLAP_DIR}
-                    ${CF_CV_EXT_DIR}
-                    ${CF_PIOTR_DIR}
-                    ${CF_PIOTR_DIR}/src
-                    src/main)
+set(CF_INCLUDE "${CF_TCLAP_DIR};
+  ${CF_CV_EXT_DIR};
+  ${CF_PIOTR_DIR};
+  ${CF_PIOTR_DIR}/src;
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main;
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cf_libs/kcf;
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cf_libs/dsst;
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cf_libs/common")
+set(CF_INCLUDE ${CF_INCLUDE} PARENT_SCOPE)
+include_directories(${CF_INCLUDE} ${OpenCV_INCLUDE_DIR})
 
-include_directories(src/cf_libs/kcf
-                    src/cf_libs/dsst
-                    src/cf_libs/common)
-                    
 set(CF_PIOTR_SOURCES
     ${CF_PIOTR_DIR}/gradientMex.hpp
     ${CF_PIOTR_DIR}/src/gradientMex.cpp
@@ -105,19 +92,10 @@ set(CF_MAIN_SOURCES
     ${CF_CV_EXT_DIR}/tracker_run.cpp
     ${CF_TCLAP_DIR}/tclap/CmdLine.h)
 
-add_executable(DSSTcpp
-    src/main/main_dsst.cpp
-    src/cf_libs/dsst/dsst_debug.hpp
-    src/cf_libs/dsst/dsst_tracker.hpp
+add_library(cf_tracking STATIC
+      src/cf_libs/kcf/kcf_debug.hpp
+      src/cf_libs/kcf/kcf_tracker.hpp
     ${CF_MAIN_SOURCES}
     ${CF_LIB_COMMON_SOURCES})
-target_link_libraries(DSSTcpp ${OpenCV_LIBS})
 
-add_executable(KCFcpp
-    src/main/main_kcf.cpp
-    src/cf_libs/kcf/kcf_debug.hpp
-    src/cf_libs/kcf/kcf_tracker.hpp
-    ${CF_MAIN_SOURCES}
-    ${CF_LIB_COMMON_SOURCES})
-target_link_libraries(KCFcpp ${OpenCV_LIBS})
-
+target_link_libraries(cf_tracking ${OpenCV_LIBS})
