@@ -343,9 +343,6 @@ namespace cf_tracking
         }
 
     private:
-        DsstTracker& operator=(const DsstTracker&)
-        {}
-
         bool reinit_(const cv::Mat& image, Rect& boundingBox)
         {
             _pos.x = floor(boundingBox.x) + floor(boundingBox.width * consts::c0_5);
