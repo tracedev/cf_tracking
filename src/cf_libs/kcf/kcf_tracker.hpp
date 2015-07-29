@@ -90,32 +90,32 @@ namespace cf_tracking
 {
     struct KcfParameters
     {
-        double padding = 1.5;
-        double lambda = 0.0001;
-        double outputSigmaFactor = 0.1;
-        double votScaleStep = 1.05;
-        double votScaleWeight = 0.95;
-        int templateSize = 100;
-        double interpFactor = 0.012;
-        double kernelSigma = 0.6;
-        int cellSize = 4;
-        int pixelPadding = 0;
+      double padding = 1.7;
+      double lambda = 0.0001;
+      double outputSigmaFactor = 0.05;
+      double votScaleStep = 1.05;
+      double votScaleWeight = 0.95;
+      int templateSize = 100;
+      double interpFactor = 0.012;
+      double kernelSigma = 0.6;
+      int cellSize = 4;
+      int pixelPadding = 0;
 
-        bool enableTrackingLossDetection = true;
-        double psrThreshold = 13.5;
-        int psrPeakDel = 1;
+      bool enableTrackingLossDetection = true;
+      double psrThreshold = 13.5;
+      int psrPeakDel = 1;
 
-        bool useVotScaleEstimation = true;
-        bool useDsstScaleEstimation = false;
-        double scaleSigmaFactor = static_cast<double>(0.25);
-        double scaleEstimatorStep = static_cast<double>(1.02);
-        double scaleLambda = static_cast<double>(0.01);
-        int scaleCellSize = 4;
-        int numberOfScales = 33;
+      bool useVotScaleEstimation = false;
+      bool useDsstScaleEstimation = true;
+      double scaleSigmaFactor = static_cast<double>(0.25);
+      double scaleEstimatorStep = static_cast<double>(1.02);
+      double scaleLambda = static_cast<double>(0.01);
+      int scaleCellSize = 4;
+      int numberOfScales = 33;
 
-        // testing
-        int resizeType = cv::INTER_LINEAR;
-        bool useFhogTranspose = false;
+    // testing
+    int resizeType = cv::INTER_LINEAR;
+    bool useFhogTranspose = false;;
     };
 
     class KcfTracker : public CfTracker
