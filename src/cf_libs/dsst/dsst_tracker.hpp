@@ -50,7 +50,7 @@ References:
 in Proc. BMVC, 2014.
 
 [2] D. Bolme, et al.,
-“Visual Object Tracking using Adaptive Correlation Filters,”
+ï¿½Visual Object Tracking using Adaptive Correlation Filters,ï¿½
 in Proc. CVPR, 2010.
 */
 
@@ -85,7 +85,7 @@ namespace cf_tracking
         int templateSize = 100;
         int cellSize = 2;
 
-        bool enableTrackingLossDetection = false;
+        bool enableTrackingLossDetection = true;
         double psrThreshold = 13.5;
         int psrPeakDel = 1;
 
