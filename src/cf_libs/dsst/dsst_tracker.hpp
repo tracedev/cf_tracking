@@ -210,6 +210,27 @@ namespace cf_tracking
             return reinit_(image, bb);
         }
 
+
+
+      virtual void set_learning_rate(double learningRate){
+        _LEARNING_RATE  = static_cast<T>(learningRate);
+      }
+
+      virtual void set_padding(double padding){
+        _PADDING  = static_cast<T>(padding);
+      }
+      virtual void set_lambda( double lambda){
+        _LAMBDA  = static_cast<T>(lambda);
+      }
+      virtual void set_output_sigma_factor(double outputSigmaFactor){
+        _OUTPUT_SIGMA_FACTOR  = static_cast<T>(outputSigmaFactor);
+      }
+
+      virtual void set_psr_threshold(double psrThreshold){
+        _PSR_THRESHOLD  = static_cast<T>(psrThreshold);
+      }
+
+
         virtual bool update(const cv::Mat& image, cv::Rect_<int>& boundingBox)
         {
             Rect bb = Rect(
@@ -681,21 +702,21 @@ namespace cf_tracking
         int _frameIdx = 1;
         bool _isInitialized;
 
-        const double _MIN_AREA;
-        const double _MAX_AREA_FACTOR;
-        const T _PADDING;
-        const T _OUTPUT_SIGMA_FACTOR;
-        const T _LAMBDA;
-        const T _LEARNING_RATE;
-        const T _PSR_THRESHOLD;
-        const int _PSR_PEAK_DEL;
-        const int _CELL_SIZE;
-        const int _TEMPLATE_SIZE;
-        const std::string _ID;
-        const bool _ENABLE_TRACKING_LOSS_DETECTION;
-        const int _RESIZE_TYPE;
-        const bool _ORIGINAL_VERSION;
-        const bool _USE_CCS;
+        double _MIN_AREA;
+        double _MAX_AREA_FACTOR;
+        T _PADDING;
+        T _OUTPUT_SIGMA_FACTOR;
+        T _LAMBDA;
+        T _LEARNING_RATE;
+        T _PSR_THRESHOLD;
+        int _PSR_PEAK_DEL;
+        int _CELL_SIZE;
+        int _TEMPLATE_SIZE;
+        std::string _ID;
+        bool _ENABLE_TRACKING_LOSS_DETECTION;
+        int _RESIZE_TYPE;
+        bool _ORIGINAL_VERSION;
+        bool _USE_CCS;
 
         DsstDebug<T>* _debug;
     };
