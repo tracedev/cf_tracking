@@ -206,6 +206,38 @@ namespace cf_tracking
             return reinit_(image, bb);
         }
 
+        virtual void set_scale_step(double scaleStep){
+        _SCALE_STEP = static_cast<T>(scaleStep);
+
+        }
+        virtual void set_scale_weight(double scaleWeight){
+          _SCALE_WEIGHT = static_cast<T>(scaleWeight);
+      }
+
+      virtual void set_interp_factor(double interpFactor){
+        _INTERP_FACTOR  = static_cast<T>(interpFactor);
+      }
+
+      virtual void set_padding(double padding){
+        _PADDING  = static_cast<T>(padding);
+      }
+      virtual void set_lambda( double lambda){
+        _LAMBDA  = static_cast<T>(lambda);
+      }
+      virtual void set_output_sigma_factor(double outputSigmaFactor){
+        _OUTPUT_SIGMA_FACTOR  = static_cast<T>(outputSigmaFactor);
+      }
+
+      virtual void set_kernel_sigma(double kernelSigma){
+        _KERNEL_SIGMA  = static_cast<T>(kernelSigma);
+      }
+
+      virtual void set_psr_threshold(double psrThreshold){
+        _PSR_THRESHOLD  = static_cast<T>(psrThreshold);
+      }
+
+
+
         virtual bool reinit(const cv::Mat& image, cv::Rect_<float>& boundingBox)
         {
             Rect bb = Rect(
@@ -757,7 +789,6 @@ namespace cf_tracking
 
             if (getTrainingData(image, numerator, denominator, xf) == false)
                 return false;
-
             _modelNumeratorf = (1 - _INTERP_FACTOR) * _modelNumeratorf + _INTERP_FACTOR * numerator;
             _modelDenominatorf = (1 - _INTERP_FACTOR) * _modelDenominatorf + _INTERP_FACTOR * denominator;
             FFC::mulValueFeatures(_modelXf, (1 - _INTERP_FACTOR));
@@ -898,14 +929,14 @@ namespace cf_tracking
 
         const double _MIN_AREA;
         const double _MAX_AREA_FACTOR;
-        const T _PADDING;
-        const T _LAMBDA;
-        const T _OUTPUT_SIGMA_FACTOR;
-        const T _SCALE_STEP;
-        const T _SCALE_WEIGHT;
-        const T _INTERP_FACTOR;
-        const T _KERNEL_SIGMA;
-        const T _PSR_THRESHOLD;
+        T _PADDING;
+        T _LAMBDA;
+        T _OUTPUT_SIGMA_FACTOR;
+        T _SCALE_STEP;
+        T _SCALE_WEIGHT;
+        T _INTERP_FACTOR;
+        T _KERNEL_SIGMA;
+        T _PSR_THRESHOLD;
         const int _TEMPLATE_SIZE;
         const int _PSR_PEAK_DEL;
         const int _CELL_SIZE;
