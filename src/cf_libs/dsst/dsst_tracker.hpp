@@ -85,7 +85,7 @@ namespace cf_tracking
         int templateSize = 100;
         int cellSize = 2;
 
-        bool enableTrackingLossDetection = true;
+        bool enableTrackingLossDetection = false;
         double psrThreshold = 13.5;
         int psrPeakDel = 1;
 
@@ -228,6 +228,12 @@ namespace cf_tracking
 
       virtual void set_psr_threshold(double psrThreshold){
         _PSR_THRESHOLD  = static_cast<T>(psrThreshold);
+      }
+      virtual void set_cell_size(int cellSize){
+        _CELL_SIZE = cellSize;
+      }
+      virtual void set_template_size(int templateSize){
+        _TEMPLATE_SIZE = templateSize;
       }
 
 
