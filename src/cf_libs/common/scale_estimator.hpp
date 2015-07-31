@@ -66,27 +66,40 @@ namespace cf_tracking
     template<typename T>
     struct ScaleEstimatorParas
     {
-        int scaleCellSize = 4;
-        T scaleModelMaxArea = static_cast<T>(512);
-        T scaleStep = static_cast<T>(1.02);
-        int numberOfScales = 33;
-        T scaleSigmaFactor = static_cast<T>(1.0 / 4.0);
+        ScaleEstimatorParas() : scaleCellSize(4),
+          scaleModelMaxArea(static_cast<T>(512)),
+          scaleStep(static_cast<T>(1.02)),
+          numberOfScales(33), 
+          scaleSigmaFactor(static_cast<T>(1.0/4.0)),
+          lambda(static_cast<T>(0.01)),
+          learningRate(static_cast<T>(0.025)),
+          useFhogTranspose(false),
+          resizeType(cv::INTER_LINEAR),
+          debugOutput(true),
+          originalVersion(false)
+          {};
 
-        T lambda = static_cast<T>(0.01);
-        T learningRate = static_cast<T>(0.025);
+        int scaleCellSize;
+        T scaleModelMaxArea;
+        T scaleStep;
+        int numberOfScales;
+        T scaleSigmaFactor;
+
+        T lambda;
+        T learningRate;
 
         // testing
-        bool useFhogTranspose = false;
-        int resizeType = cv::INTER_LINEAR;
-        bool debugOutput = true;
-        bool originalVersion = false;
+        bool useFhogTranspose;
+        int resizeType;
+        bool debugOutput;
+        bool originalVersion;
     };
 
     template<typename T>
     class ScaleEstimator
     {
     public:
-        typedef FhogFeatureChannels<T> FFC;
+        typedef typename FhogFeatureChannels<T>::type FFC;
         typedef cv::Size_<T> Size;
         typedef cv::Point_<T> Point;
         typedef mat_consts::constants<T> consts;
@@ -94,6 +107,10 @@ namespace cf_tracking
         ScaleEstimator(ScaleEstimatorParas<T> paras) :
             _frameIdx(0),
             _isInitialized(false),
+            _scaleModelFactor(0),
+            fhogToCvCol(0),
+            _MIN_SCALE_FACTOR(static_cast<T>(0.01)),
+            _MAX_SCALE_FACTOR(static_cast<T>(40)),
             _SCALE_CELL_SIZE(paras.scaleCellSize),
             _SCALE_MODEL_MAX_AREA(paras.scaleModelMaxArea),
             _SCALE_STEP(paras.scaleStep),
@@ -304,10 +321,10 @@ namespace cf_tracking
     private:
         typedef void(*fhogToCvRowPtr)
             (const cv::Mat& img, cv::Mat& cvFeatures, int binSize, int rowIdx, T cosFactor);
-        fhogToCvRowPtr fhogToCvCol = 0;
+        fhogToCvRowPtr fhogToCvCol;
 
         cv::Mat _scaleWindow;
-        T _scaleModelFactor = 0;
+        T _scaleModelFactor;
         cv::Mat _sfNumerator;
         cv::Mat _sfDenominator;
         cv::Mat _scaleFactors;
@@ -327,8 +344,8 @@ namespace cf_tracking
         const T _LEARNING_RATE;
         const int _RESIZE_TYPE;
         // it should be possible to find more reasonable values for min/max scale; application dependent
-        T _MIN_SCALE_FACTOR = static_cast<T>(0.01);
-        T _MAX_SCALE_FACTOR = static_cast<T>(40);
+        T _MIN_SCALE_FACTOR;
+        T _MAX_SCALE_FACTOR;
 
         const bool _DEBUG_OUTPUT;
         const bool _ORIGINAL_VERSION;

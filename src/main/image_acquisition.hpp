@@ -36,10 +36,11 @@
 
 struct ImgAcqParas
 {
-    bool isMock = false;
-    int device = -1;
-    std::string sequencePath = "";
-    std::string expansionStr = "";
+    ImgAcqParas() : isMock(false), device(-1), sequencePath(""), expansionStr("") {}
+    bool isMock;
+    int device;
+    std::string sequencePath;
+    std::string expansionStr;
 };
 
 class VideoCaptureMock

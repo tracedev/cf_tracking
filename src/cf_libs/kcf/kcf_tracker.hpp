@@ -125,7 +125,7 @@ namespace cf_tracking
         typedef double T; // set precision here: double or float
         static const int CV_TYPE = cv::DataType<T>::type;
         typedef cv::Size_<T> Size;
-        typedef FhogFeatureChannels<T> FFC;
+        typedef typename FhogFeatureChannels<T>::type FFC;
         typedef mat_consts::constants<T> consts;
         typedef cv::Point_<T> Point;
         typedef cv::Rect_<T> Rect;

@@ -106,13 +106,13 @@ private:
     TCLAP::CmdLine _cmd;
     cf_tracking::TrackerDebug* _debug;
     int _frameIdx;
-    bool _isPaused = false;
-    bool _isStep = false;
-    bool _exit = false;
-    bool _hasInitBox = false;
-    bool _isTrackerInitialzed = false;
-    bool _targetOnFrame = false;
-    bool _updateAtPos = false;
+    bool _isPaused;
+    bool _isStep;
+    bool _exit;
+    bool _hasInitBox;
+    bool _isTrackerInitialzed;
+    bool _targetOnFrame;
+    bool _updateAtPos;
 };
 
 #endif

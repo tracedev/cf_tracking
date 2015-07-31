@@ -65,6 +65,7 @@ set(CF_PIOTR_SOURCES
     ${CF_PIOTR_DIR}/gradientMex.hpp
     ${CF_PIOTR_DIR}/src/gradientMex.cpp
     ${CF_PIOTR_DIR}/src/sse.hpp
+    ${CF_PIOTR_DIR}/src/sse_to_neon.hpp
     ${CF_PIOTR_DIR}/src/wrappers.hpp)
 
 set(CF_LIB_COMMON_SOURCES

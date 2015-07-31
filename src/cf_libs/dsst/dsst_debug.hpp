@@ -48,7 +48,9 @@ namespace cf_tracking
         DsstDebug() :
             _maxResponse(0),
             _psrClamped(0),
-            _targetSizeArea(0)
+            _targetSizeArea(0),
+            _SUB_WINDOW_TITLE("Sub Window"),
+            _RESPONSE_TITLE("Response")
         {}
 
         virtual ~DsstDebug()
@@ -114,8 +116,8 @@ namespace cf_tracking
         }
 
     private:
-        const std::string _SUB_WINDOW_TITLE = "Sub Window";
-        const std::string _RESPONSE_TITLE = "Response";
+        const std::string _SUB_WINDOW_TITLE;
+        const std::string _RESPONSE_TITLE;
         double _maxResponse;
         double _psrClamped;
         T _targetSizeArea;

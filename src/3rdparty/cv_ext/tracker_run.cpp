@@ -55,6 +55,7 @@
 #include "tracker_run.hpp"
 
 #include <iostream>
+#include <stdexcept>
 #include <ctype.h>
 
 #include "init_box_selector.hpp"
@@ -68,7 +69,14 @@ using namespace cf_tracking;
 TrackerRun::TrackerRun(string windowTitle) :
 _windowTitle(windowTitle),
 _cmd(_windowTitle.c_str(), ' ', "0.1"),
-_debug(0)
+_debug(0),
+_isPaused(false),
+_isStep(false),
+_exit(false),
+_hasInitBox(false),
+_isTrackerInitialzed(false),
+_targetOnFrame(false),
+_updateAtPos(false)
 {
     _tracker = 0;
 }
