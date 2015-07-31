@@ -79,11 +79,10 @@ RETf DEC(__m128 &x, const __m128 y) { return x = SUB(x, y); }
 RETf DEC(float &x, const __m128 y) { __m128 t = SUB(LD(x), y); return STR(x, t); }
 RETf MIN_SSE(const __m128 x, const __m128 y) { return _mm_min_ps(x, y); }
 RETf RCP(const __m128 x) { return _mm_rcp_ps(x); }
-RETf RCPSQRT(const __m128 x) { return _mm_rsqrt_ps(x); }
 
 RETf SQRT(const __m128 x) { return _mm_sqrt_ps(x); }
 RETf MAX_SSE(const __m128 x, const __m128 y) { return _mm_max_ps(x, y); }
-RETf DIV(const __m128 x, const __m128 y) { return _mm_div_ps(x, y); }
+RETf DIV(const __m128 x, const __m128 y) { return x/y; }
 RETf DIV(const __m128 x, const float y) { return DIV(x, SET(y)); }
 RETf DIV(const float x, const __m128 y) { return DIV(SET(x), y); }
 

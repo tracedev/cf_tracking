@@ -519,36 +519,6 @@ FORCE_INLINE __m128i _mm_shufflehi_epi16_function(__m128i a)
 // Shifts the 128-bit value in a left by imm bytes while shifting in zeros. imm must be an immediate.  https://msdn.microsoft.com/en-us/library/34d3k2kt(v=vs.100).aspx
 #define _mm_slli_si128( a, imm ) (__m128i)vextq_s8(vdupq_n_s8(0), (int8x16_t)a, 16 - (imm))
 
-// NEON does not provide a version of this function, here is an article about some ways to repro the results.
-// http://stackoverflow.com/questions/11870910/sse-mm-movemask-epi8-equivalent-method-for-arm-neon
-// Creates a 16-bit mask from the most significant bits of the 16 signed or unsigned 8-bit integers in a and zero extends the upper bits. https://msdn.microsoft.com/en-us/library/vstudio/s090c8fk(v=vs.100).aspx
-FORCE_INLINE int _mm_movemask_epi8(__m128i _a)
-{
-	uint8x16_t input = (uint8x16_t)_a;
-	const int8_t __attribute__((aligned(16))) xr[8] = { -7, -6, -5, -4, -3, -2, -1, 0 };
-	uint8x8_t mask_and = vdup_n_u8(0x80);
-	int8x8_t mask_shift = vld1_s8(xr);
-
-	uint8x8_t lo = vget_low_u8(input);
-	uint8x8_t hi = vget_high_u8(input);
-
-	lo = vand_u8(lo, mask_and);
-	lo = vshl_u8(lo, mask_shift);
-
-	hi = vand_u8(hi, mask_and);
-	hi = vshl_u8(hi, mask_shift);
-
-	lo = vpadd_u8(lo, lo);
-	lo = vpadd_u8(lo, lo);
-	lo = vpadd_u8(lo, lo);
-
-	hi = vpadd_u8(hi, hi);
-	hi = vpadd_u8(hi, hi);
-	hi = vpadd_u8(hi, hi);
-
-	return ((hi[0] << 8) | (lo[0] & 0xFF));
-}
-
 
 // ******************************************
 // Math operations

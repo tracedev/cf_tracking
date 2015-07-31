@@ -43,7 +43,7 @@ if(WITH_OPENMP)
 endif(WITH_OPENMP)
 
 # add OpenCV
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED highgui video videoio imgproc imgcodecs)
 
 # add 3rdparty source
 set(CF_TCLAP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/tclap")
