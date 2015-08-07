@@ -90,34 +90,56 @@ namespace cf_tracking
 {
     struct KcfParameters
     {
-      double padding = 1.7;
-      double lambda = 0.0001;
-      double outputSigmaFactor = 0.05;
-      double votScaleStep = 1.05;
-      double votScaleWeight = 0.95;
-      int templateSize = 100;
-      double interpFactor = 0.012;
-      double kernelSigma = 0.6;
-      int cellSize = 4;
-      int pixelPadding = 0;
+      double padding;
+        double lambda;
+        double outputSigmaFactor;
+        double votScaleStep;
+        double votScaleWeight;
+        int templateSize;
+        double interpFactor;
+        double kernelSigma;
+        int cellSize;
+        int pixelPadding;
 
-      bool enableTrackingLossDetection = true;
-      double psrThreshold = 13.5;
-      int psrPeakDel = 1;
+        bool enableTrackingLossDetection;
+        double psrThreshold;
+        int psrPeakDel;
 
-      bool useVotScaleEstimation = false;
-      bool useDsstScaleEstimation = true;
-      double scaleSigmaFactor = static_cast<double>(0.25);
-      double scaleEstimatorStep = static_cast<double>(1.02);
-      double scaleLambda = static_cast<double>(0.01);
-      int scaleCellSize = 4;
-      int numberOfScales = 33;
+        bool useVotScaleEstimation;
+        bool useDsstScaleEstimation;
+        double scaleSigmaFactor;
+        double scaleEstimatorStep;
+        double scaleLambda;
+        int scaleCellSize;
+        int numberOfScales;
 
-    // testing
-    int resizeType = cv::INTER_LINEAR;
-    bool useFhogTranspose = false;;
-    };
+        int resizeType;
+        bool useFhogTranspose;
+        KcfParameters() :
+          padding(1.7),
+          lambda(static_cast<double>(0.0001)),
+          outputSigmaFactor(0.05),
+          votScaleStep(1.05),
+          votScaleWeight(0.95),
+          templateSize(100),
+          interpFactor(0.012),
+          kernelSigma(0.6),
+          cellSize(4),
+          pixelPadding(0),
+          enableTrackingLossDetection(false),
+          psrThreshold(13.5),
+          psrPeakDel(1),
+          useVotScaleEstimation(false),
+          useDsstScaleEstimation(true),
+          scaleSigmaFactor(static_cast<double>(0.25)),
+          scaleEstimatorStep(static_cast<double>(1.02)),
+          scaleCellSize(4),
+          numberOfScales(33),
+          resizeType(cv::INTER_LINEAR),
+          useFhogTranspose(false)
+        {};
 
+        };
     class KcfTracker : public CfTracker
     {
     public:
