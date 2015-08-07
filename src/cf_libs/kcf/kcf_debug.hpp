@@ -47,7 +47,9 @@ namespace cf_tracking
     public:
         KcfDebug() :
             _maxResponse(0),
-            _psrClamped(0)
+            _psrClamped(0),
+            _SUB_WINDOW_TITLE("Sub Window"),
+            _RESPONSE_TITLE("Response")
         {}
 
         virtual ~KcfDebug()
@@ -104,8 +106,8 @@ namespace cf_tracking
         }
 
     private:
-        const std::string _SUB_WINDOW_TITLE = "Sub Window";
-        const std::string _RESPONSE_TITLE = "Response";
+        const std::string _SUB_WINDOW_TITLE;
+        const std::string _RESPONSE_TITLE;
         T _maxResponse;
         T _psrClamped;
         std::stringstream _ss;
