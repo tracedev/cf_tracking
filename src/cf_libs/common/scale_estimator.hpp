@@ -75,7 +75,6 @@ namespace cf_tracking
           learningRate(static_cast<T>(0.025)),
           useFhogTranspose(false),
           resizeType(cv::INTER_LINEAR),
-          debugOutput(true),
           originalVersion(false)
           {};
 
@@ -91,7 +90,6 @@ namespace cf_tracking
         // testing
         bool useFhogTranspose;
         int resizeType;
-        bool debugOutput;
         bool originalVersion;
     };
 
@@ -120,21 +118,11 @@ namespace cf_tracking
             _LEARNING_RATE(paras.learningRate),
             _TYPE(cv::DataType<T>::type),
             _RESIZE_TYPE(paras.resizeType),
-            _DEBUG_OUTPUT(paras.debugOutput),
             _ORIGINAL_VERSION(paras.originalVersion)
         {
             // init dft
             cv::Mat initDft = (cv::Mat_<T>(1, 1) << 1);
             dft(initDft, initDft);
-
-            if (_DEBUG_OUTPUT)
-            {
-                if (CV_MAJOR_VERSION < 3)
-                {
-                    std::cout << "ScaleEstimator: Using OpenCV Version: " << CV_MAJOR_VERSION << std::endl;
-                    std::cout << "For more speed use 3.0 or higher!" << std::endl;
-                }
-            }
 
             if (paras.useFhogTranspose)
                 fhogToCvCol = &piotr::fhogToCvColT;
@@ -347,7 +335,6 @@ namespace cf_tracking
         T _MIN_SCALE_FACTOR;
         T _MAX_SCALE_FACTOR;
 
-        const bool _DEBUG_OUTPUT;
         const bool _ORIGINAL_VERSION;
     };
 }

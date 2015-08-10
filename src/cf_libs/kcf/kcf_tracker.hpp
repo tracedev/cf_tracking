@@ -82,7 +82,6 @@ in Proc. CVPR, 2010.
 #include "mat_consts.hpp"
 #include "math_helper.hpp"
 #include "cf_tracker.hpp"
-#include "kcf_debug.hpp"
 #include "scale_estimator.hpp"
 #include "psr.hpp"
 
@@ -144,7 +143,7 @@ namespace cf_tracking
     {
     public:
         static const int NUM_FEATURE_CHANNELS = 31;
-        typedef double T; // set precision here: double or float
+        typedef float T; // set precision here: double or float
         static const int CV_TYPE = cv::DataType<T>::type;
         typedef cv::Size_<T> Size;
         typedef typename FhogFeatureChannels<T>::type FFC;
@@ -152,7 +151,7 @@ namespace cf_tracking
         typedef cv::Point_<T> Point;
         typedef cv::Rect_<T> Rect;
 
-        KcfTracker(KcfParameters paras, KcfDebug<T>* debug = 0)
+        KcfTracker(KcfParameters paras)
             : _isInitialized(false),
             _PADDING(static_cast<T>(paras.padding)),
             _LAMBDA(static_cast<T>(paras.lambda)),
@@ -174,8 +173,7 @@ namespace cf_tracking
             _RESIZE_TYPE(paras.resizeType),
             _ID("KCFcpp"),
             _USE_CCS(true),
-            _scaleEstimator(0),
-            _debug(debug)
+            _scaleEstimator(0)
         {
             correlate = &KcfTracker::gaussianCorrelation;
 
@@ -201,14 +199,6 @@ namespace cf_tracking
             else
                 cvFhog = &piotr::cvFhog < T, FFC > ;
 
-            if (_debug != 0)
-            {
-                if (CV_MAJOR_VERSION < 3)
-                {
-                    std::cout << "KcfTracker: Using OpenCV Version: " << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION << std::endl;
-                    std::cout << "For more speed use 3.0 or higher!" << std::endl;
-                }
-            }
         }
 
         virtual ~KcfTracker()
@@ -258,32 +248,6 @@ namespace cf_tracking
         _PSR_THRESHOLD  = static_cast<T>(psrThreshold);
       }
 
-
-
-        virtual bool reinit(const cv::Mat& image, cv::Rect_<float>& boundingBox)
-        {
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            return reinit_(image, bb);
-        }
-
-        virtual bool reinit(const cv::Mat& image, cv::Rect_<double>& boundingBox)
-        {
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            return reinit_(image, bb);
-        }
-
         virtual bool update(const cv::Mat& image, cv::Rect_<int>& boundingBox)
         {
             bool isValid = false;
@@ -301,48 +265,6 @@ namespace cf_tracking
             boundingBox.y = static_cast<int>(round(bb.y));
             boundingBox.width = static_cast<int>(round(bb.width));
             boundingBox.height = static_cast<int>(round(bb.height));
-
-            return isValid;
-        }
-
-        virtual bool update(const cv::Mat& image, cv::Rect_<float>& boundingBox)
-        {
-            bool isValid = false;
-
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            isValid = update_(image, bb);
-
-            boundingBox.x = static_cast<float>(bb.x);
-            boundingBox.y = static_cast<float>(bb.y);
-            boundingBox.width = static_cast<float>(bb.width);
-            boundingBox.height = static_cast<float>(bb.height);
-
-            return isValid;
-        }
-
-        virtual bool update(const cv::Mat& image, cv::Rect_<double>& boundingBox)
-        {
-            bool isValid = false;
-
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            isValid = update_(image, bb);
-
-            boundingBox.x = static_cast<double>(bb.x);
-            boundingBox.y = static_cast<double>(bb.y);
-            boundingBox.width = static_cast<double>(bb.width);
-            boundingBox.height = static_cast<double>(bb.height);
 
             return isValid;
         }
@@ -366,53 +288,6 @@ namespace cf_tracking
             boundingBox.height = static_cast<int>(round(bb.height));
 
             return isValid;
-        }
-
-        virtual bool updateAt(const cv::Mat& image, cv::Rect_<float>& boundingBox)
-        {
-            bool isValid = false;
-
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            isValid = updateAt_(image, bb);
-
-            boundingBox.x = static_cast<float>(bb.x);
-            boundingBox.y = static_cast<float>(bb.y);
-            boundingBox.width = static_cast<float>(bb.width);
-            boundingBox.height = static_cast<float>(bb.height);
-
-            return isValid;
-        }
-
-        virtual bool updateAt(const cv::Mat& image, cv::Rect_<double>& boundingBox)
-        {
-            bool isValid = false;
-
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            isValid = updateAt_(image, bb);
-
-            boundingBox.x = static_cast<double>(bb.x);
-            boundingBox.y = static_cast<double>(bb.y);
-            boundingBox.width = static_cast<double>(bb.width);
-            boundingBox.height = static_cast<double>(bb.height);
-
-            return isValid;
-        }
-
-        virtual TrackerDebug* getTrackerDebug()
-        {
-            return _debug;
         }
 
         virtual const std::string getId()
@@ -625,11 +500,6 @@ namespace cf_tracking
             cv::Mat patchResizedFloat;
             patchResized.convertTo(patchResizedFloat, CV_32FC(3));
 
-            if (_debug != 0)
-            {
-                _debug->showPatch(patchResized);
-            }
-
             patchResizedFloat *= 0.003921568627451; // patchResizedFloat /= 255;
 
             features.reset(new FFC());
@@ -711,12 +581,6 @@ namespace cf_tracking
         {
             T peakValue = 0;
             T psrClamped = calcPsr(response, maxResponseIdx, _PSR_PEAK_DEL, peakValue);
-
-            if (_debug)
-            {
-                _debug->showResponse(response, peakValue);
-                _debug->setPsr(psrClamped);
-            }
 
             if (psrClamped < _PSR_THRESHOLD)
                 return false;
@@ -971,8 +835,6 @@ namespace cf_tracking
         // it should be possible to find more reasonable values for min/max scale; application dependent
         T _VOT_MIN_SCALE_FACTOR;
         T _VOT_MAX_SCALE_FACTOR;
-
-        KcfDebug<T>* _debug;
     };
 }
 

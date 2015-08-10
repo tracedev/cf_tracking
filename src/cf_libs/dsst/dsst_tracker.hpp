@@ -71,7 +71,6 @@ in Proc. CVPR, 2010.
 #include "math_helper.hpp"
 #include "cf_tracker.hpp"
 #include "scale_estimator.hpp"
-#include "dsst_debug.hpp"
 #include "psr.hpp"
 
 namespace cf_tracking
@@ -132,7 +131,7 @@ namespace cf_tracking
         typedef typename DsstFeatureChannels<T>::type DFC;
         typedef mat_consts::constants<T> consts;
 
-        DsstTracker(DsstParameters paras, DsstDebug<T>* debug = 0)
+        DsstTracker(DsstParameters paras)
             : _isInitialized(false),
             _scaleEstimator(0),
             cvFhog(0),
@@ -152,8 +151,7 @@ namespace cf_tracking
             _ENABLE_TRACKING_LOSS_DETECTION(paras.enableTrackingLossDetection),
             _ORIGINAL_VERSION(paras.originalVersion),
             _RESIZE_TYPE(paras.resizeType),
-            _USE_CCS(true),
-            _debug(debug)
+            _USE_CCS(true)
         {
             if (paras.enableScaleEstimator)
             {
@@ -183,12 +181,6 @@ namespace cf_tracking
             // init dft
             cv::Mat initDft = (cv::Mat_<T>(1, 1) << 1);
             calcDft(initDft, initDft, 0);
-
-            if (CV_MAJOR_VERSION < 3)
-            {
-                std::cout << "DsstTracker: Using OpenCV Version: " << CV_MAJOR_VERSION << std::endl;
-                std::cout << "For more speed use 3.0 or higher!" << std::endl;
-            }
         }
 
         virtual ~DsstTracker()
@@ -207,32 +199,6 @@ namespace cf_tracking
 
             return reinit_(image, bb);
         }
-
-        virtual bool reinit(const cv::Mat& image, cv::Rect_<float>& boundingBox)
-        {
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            return reinit_(image, bb);
-        }
-
-        virtual bool reinit(const cv::Mat& image, cv::Rect_<double>& boundingBox)
-        {
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            return reinit_(image, bb);
-        }
-
-
 
       virtual void set_learning_rate(double learningRate){
         _LEARNING_RATE  = static_cast<T>(learningRate);
@@ -279,45 +245,6 @@ namespace cf_tracking
             return true;
         }
 
-        virtual bool update(const cv::Mat& image, cv::Rect_<float>& boundingBox)
-        {
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            if (update_(image, bb) == false)
-                return false;
-
-            boundingBox.x = static_cast<float>(bb.x);
-            boundingBox.y = static_cast<float>(bb.y);
-            boundingBox.width = static_cast<float>(bb.width);
-            boundingBox.height = static_cast<float>(bb.height);
-            return true;
-        }
-
-        virtual bool update(const cv::Mat& image, cv::Rect_<double>& boundingBox)
-        {
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            if (update_(image, bb) == false)
-                return false;
-
-            boundingBox.x = static_cast<double>(bb.x);
-            boundingBox.y = static_cast<double>(bb.y);
-            boundingBox.width = static_cast<double>(bb.width);
-            boundingBox.height = static_cast<double>(bb.height);
-
-            return true;
-        }
-
         virtual bool updateAt(const cv::Mat& image, cv::Rect_<int>& boundingBox)
         {
             bool isValid = false;
@@ -337,53 +264,6 @@ namespace cf_tracking
             boundingBox.height = static_cast<int>(round(bb.height));
 
             return isValid;
-        }
-
-        virtual bool updateAt(const cv::Mat& image, cv::Rect_<float>& boundingBox)
-        {
-            bool isValid = false;
-
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            isValid = updateAt_(image, bb);
-
-            boundingBox.x = static_cast<float>(bb.x);
-            boundingBox.y = static_cast<float>(bb.y);
-            boundingBox.width = static_cast<float>(bb.width);
-            boundingBox.height = static_cast<float>(bb.height);
-
-            return isValid;
-        }
-
-        virtual bool updateAt(const cv::Mat& image, cv::Rect_<double>& boundingBox)
-        {
-            bool isValid = false;
-
-            Rect bb = Rect(
-                static_cast<T>(boundingBox.x),
-                static_cast<T>(boundingBox.y),
-                static_cast<T>(boundingBox.width),
-                static_cast<T>(boundingBox.height)
-                );
-
-            isValid = updateAt_(image, bb);
-
-            boundingBox.x = static_cast<double>(bb.x);
-            boundingBox.y = static_cast<double>(bb.y);
-            boundingBox.width = static_cast<double>(bb.width);
-            boundingBox.height = static_cast<double>(bb.height);
-
-            return isValid;
-        }
-
-        virtual TrackerDebug* getTrackerDebug()
-        {
-            return _debug;
         }
 
         virtual const std::string getId()
@@ -488,9 +368,6 @@ namespace cf_tracking
             else
                 resize(patch, patch, _templateSz, 0, 0, _RESIZE_TYPE);
 
-            if (_debug != 0)
-                _debug->showPatch(patch);
-
             cv::Mat floatPatch;
             patch.convertTo(floatPatch, CV_32FC(3));
 
@@ -594,12 +471,6 @@ namespace cf_tracking
             T peakValue = 0;
             T psrClamped = calcPsr(response, maxResponseIdx, _PSR_PEAK_DEL, peakValue);
 
-            if (_debug != 0)
-            {
-                _debug->showResponse(response, peakValue);
-                _debug->setPsr(psrClamped);
-            }
-
             if (psrClamped < _PSR_THRESHOLD)
                 return false;
 
@@ -659,9 +530,6 @@ namespace cf_tracking
             T posDeltaY = (subDelta.y + 1 - floor(translationResponse.rows / consts::c2_0)) * newScale;
             newPos.x += round(posDeltaX * _CELL_SIZE);
             newPos.y += round(posDeltaY * _CELL_SIZE);
-
-            if (_debug != 0)
-                _debug->showResponse(translationResponse, maxResponse);
 
             if (_scaleEstimator)
             {
@@ -745,8 +613,6 @@ namespace cf_tracking
         int _RESIZE_TYPE;
         bool _ORIGINAL_VERSION;
         bool _USE_CCS;
-
-        DsstDebug<T>* _debug;
     };
 }
 

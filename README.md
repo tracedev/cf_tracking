@@ -9,66 +9,17 @@ use a fixed template size and the subpixel/cell response peak estimation as in
 the KCF version. Project webpage: http://www.cvl.isy.liu.se/en/research/objrec/visualtracking/scalvistrack/index.html
 
 Both implementations use the FHOG features proposed in [4].
+
 More specifically, the FHOG implementation  from [5] is used.
-Both trackers offer the option to use the target
-loss detection proposed in [6].
 
-
-
-
-# Build
-### Dependencies
-* C++11
-* OpenCV 3.0
-* CMake
-* SSE2-capable CPU
-
-Compilation has been tested on Windows 7 with Visual Studio 2013 Ultimate,
-on Windows 8.1 with Visual Studio 2013 Community and on Ubuntu 14.04 with g++.
-
-### Windows 7
-* Set environment variables according to [OpenCV Setup - Environment Variables](http://docs.opencv.org/doc/tutorials/introduction/windows_install/windows_install.html#windowssetpathandenviromentvariable)
-* Launch cmake-gui, create a build folder and configure.
-* Open CfTracking.sln in Visual Studio and compile the projects DSSTcpp and KCFcpp.
-
-### Ubuntu 14.04
-* Install OpenCV 3.0 and CMake.
-* Configure and compile:
-```
-mkdir <src-dir>/build
-cd <src-dir>/build
-cmake ../
-make -j 8
-```
-
-# Usage
-* To track images from a webcam, simply launch DSSTcpp(.exe) or KCFcpp(.exe) and
-mark an object with a rectangle.
-* To pass a predefined bounding box, use the `-b x,y,w,h` command line switch. Boxes
-are expected to use images starting at position 0,0.
-* To track an image sequence or video, copy the contents of `<src-dir>/sample/*` to your build/release folder and run the batch/sh file.
-The example launch scripts are brief and explain the trackers' usage. If you run the tracker from Windows cmd, use only one
-% sign to specify the naming convention of the image sequence.
-* To enable target loss detection, run the tracker with the `--para_enable_tracking_loss` command line switch.
-* To achieve tracking performance as close to the original Matlab implementations as possible, run the trackers with the `--original_version` command line switch.
-While the trackers are implemented closely to their original Matlab implementations,
-implementation differences do still exist (even with the `--original_version` switch) and the tracking performance of the C++ implementations
-may deviate from their original Matlab implementations.
-* To see a full list of available options, run the trackers with `--help` command line switch.
-
+Both trackers offer the option to use the target loss detection proposed in [6].
 
 # Commercial Use (US)
 The code using linear correlation filters may be affected by a US patent. If you want to use this code commercially in the US please refer to http://www.cs.colostate.edu/~vision/ocof_toolset_2012/index.php for possible patent claims.
 
-
-# Contributors
-Luka Cehovin: Equalize FHOG performance on AMD and Intel CPUs
-
-
 ## 3rdparty libraries used:
 * Piotr's Matlab Toolbox http://vision.ucsd.edu/~pdollar/toolbox/doc/
 * OpenCV http://opencv.org/
-* tclap http://tclap.sourceforge.net/
 
 ## References
 If you reuse this code for a scientific publication, please cite the related publications (dependent on what parts of the code you reuse):

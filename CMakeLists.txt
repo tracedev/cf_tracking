@@ -46,11 +46,10 @@ endif(WITH_OPENMP)
 find_package(OpenCV REQUIRED highgui video videoio imgproc imgcodecs)
 
 # add 3rdparty source
-set(CF_TCLAP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/tclap")
 set(CF_CV_EXT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/cv_ext")
 set(CF_PIOTR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/piotr")
 
-set(CF_INCLUDE "${CF_TCLAP_DIR};
+set(CF_INCLUDE "
   ${CF_CV_EXT_DIR};
   ${CF_PIOTR_DIR};
   ${CF_PIOTR_DIR}/src;
@@ -62,40 +61,18 @@ set(CF_INCLUDE ${CF_INCLUDE} PARENT_SCOPE)
 include_directories(${CF_INCLUDE} ${OpenCV_INCLUDE_DIR})
 
 set(CF_PIOTR_SOURCES
-    ${CF_PIOTR_DIR}/gradientMex.hpp
-    ${CF_PIOTR_DIR}/src/gradientMex.cpp
-    ${CF_PIOTR_DIR}/src/sse.hpp
-    ${CF_PIOTR_DIR}/src/sse_to_neon.hpp
-    ${CF_PIOTR_DIR}/src/wrappers.hpp)
+    ${CF_PIOTR_DIR}/src/gradientMex.cpp)
 
 set(CF_LIB_COMMON_SOURCES
-    src/cf_libs/common/feature_channels.hpp
-    src/cf_libs/common/mat_consts.hpp
-    src/cf_libs/common/math_helper.hpp
     src/cf_libs/common/math_helper.cpp
-    src/cf_libs/common/cf_tracker.hpp
-    src/cf_libs/common/tracker_debug.hpp
-    src/cf_libs/common/scale_estimator.hpp
-    src/cf_libs/common/cv_ext.hpp
     ${CF_CV_EXT_DIR}/shift.cpp
-    ${CF_CV_EXT_DIR}/shift.hpp
     ${CF_CV_EXT_DIR}/math_spectrums.cpp
-    ${CF_CV_EXT_DIR}/math_spectrums.hpp
-    ${CF_CV_EXT_DIR}/psr.hpp
     ${CF_PIOTR_SOURCES})
 
 set(CF_MAIN_SOURCES
-    src/main/image_acquisition.hpp
-    src/main/image_acquisition.cpp
-    ${CF_CV_EXT_DIR}/init_box_selector.hpp
-    ${CF_CV_EXT_DIR}/init_box_selector.cpp
-    ${CF_CV_EXT_DIR}/tracker_run.hpp
-    ${CF_CV_EXT_DIR}/tracker_run.cpp
-    ${CF_TCLAP_DIR}/tclap/CmdLine.h)
+    src/main/image_acquisition.cpp)
 
 add_library(cf_tracking STATIC
-      src/cf_libs/kcf/kcf_debug.hpp
-      src/cf_libs/kcf/kcf_tracker.hpp
     ${CF_MAIN_SOURCES}
     ${CF_LIB_COMMON_SOURCES})
 

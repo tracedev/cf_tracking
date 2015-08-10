@@ -6,4 +6,5 @@ if (NOT TARGET cf_tracking)
   add_subdirectory(${cf_tracking_path} cf_tracking_build)
 endif()
 
+# Added by subdirectory
 include_directories(${CF_INCLUDE})
