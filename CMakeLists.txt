@@ -49,8 +49,7 @@ find_package(OpenCV REQUIRED highgui video videoio imgproc imgcodecs)
 set(CF_CV_EXT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/cv_ext")
 set(CF_PIOTR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/piotr")
 
-set(CF_INCLUDE "
-  ${CF_CV_EXT_DIR};
+set(CF_INCLUDE "${CF_CV_EXT_DIR};
   ${CF_PIOTR_DIR};
   ${CF_PIOTR_DIR}/src;
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main;

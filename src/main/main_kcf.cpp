@@ -33,7 +33,6 @@
 #include <iostream>
 #include "kcf_tracker.hpp"
 #include "tracker_run.hpp"
-#include "kcf_debug.hpp"
 
 class KcfTrackerRun : public TrackerRun
 {
@@ -48,7 +47,6 @@ public:
     virtual cf_tracking::CfTracker* parseTrackerParas(TCLAP::CmdLine& cmd, int argc, const char** argv)
     {
         cf_tracking::KcfParameters paras;
-        TCLAP::SwitchArg debugOutput("v", "debug", "Output Debug info!", cmd, false);
         TCLAP::SwitchArg originalVersion("", "original_version", "Parameters and performance as close to the KCF VOT version as possible.", cmd, false);
         TCLAP::SwitchArg originalParametersWithScaleFilter("", "original_parameters_scale_filter", "KCF VOT version parameters with DSST scale filter.", cmd, false);
         TCLAP::ValueArg<int> templateSize("", "para_template_size", "template size", false, paras.templateSize, "integer", cmd);
@@ -125,17 +123,8 @@ public:
             paras.useFhogTranspose = false;
         }
 
-        if (debugOutput.getValue())
-        {
-            setTrackerDebug(&_debug);
-            return new cf_tracking::KcfTracker(paras, &_debug);
-        }
-
         return new cf_tracking::KcfTracker(paras);
     }
-
-private:
-    cf_tracking::KcfDebug<cf_tracking::KcfTracker::T> _debug;
 };
 
 int main(int argc, const char** argv)

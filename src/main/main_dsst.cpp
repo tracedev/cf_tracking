@@ -46,7 +46,6 @@ public:
     virtual cf_tracking::CfTracker* parseTrackerParas(TCLAP::CmdLine& cmd, int argc, const char** argv)
     {
         cf_tracking::DsstParameters paras;
-        TCLAP::SwitchArg debugOutput("v", "debug", "Output Debug info!", cmd, false);
         TCLAP::SwitchArg originalVersion("", "original_version", "Use the original parameters found in the DSST paper. Performance is close, "
             "but differences do still exist!", cmd, false);
         TCLAP::ValueArg<int> templateSize("", "para_template_size", "template size", false,
@@ -115,17 +114,8 @@ public:
             paras.resizeType = cv::INTER_AREA;
         }
 
-        if (debugOutput.getValue())
-        {
-            setTrackerDebug(&_debug);
-            return new cf_tracking::DsstTracker(paras, &_debug);
-        }
-
         return new cf_tracking::DsstTracker(paras);
     }
-
-private:
-    cf_tracking::DsstDebug<cf_tracking::DsstTracker::T> _debug;
 };
 
 int main(int argc, const char** argv)
