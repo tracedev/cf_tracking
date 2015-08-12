@@ -49,7 +49,7 @@ find_package(OpenCV REQUIRED highgui video videoio imgproc imgcodecs)
 set(CF_CV_EXT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/cv_ext")
 set(CF_PIOTR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/piotr")
 
-set(CF_INCLUDE "
+set(CF_TRACKING_INCLUDE "
   ${CF_CV_EXT_DIR};
   ${CF_PIOTR_DIR};
   ${CF_PIOTR_DIR}/src;
@@ -57,8 +57,8 @@ set(CF_INCLUDE "
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cf_libs/kcf;
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cf_libs/dsst;
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cf_libs/common")
-set(CF_INCLUDE ${CF_INCLUDE} PARENT_SCOPE)
-include_directories(${CF_INCLUDE} ${OpenCV_INCLUDE_DIR})
+set(CF_TRACKING_INCLUDE ${CF_TRACKING_INCLUDE} PARENT_SCOPE)
+include_directories(${CF_TRACKING_INCLUDE} ${OpenCV_INCLUDE_DIR})
 
 set(CF_PIOTR_SOURCES
     ${CF_PIOTR_DIR}/src/gradientMex.cpp)
