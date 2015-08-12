@@ -72,8 +72,8 @@ set(CF_LIB_COMMON_SOURCES
 set(CF_MAIN_SOURCES
     src/main/image_acquisition.cpp)
 
-add_library(cf_tracking STATIC
+add_library(cf_tracking_lib STATIC
     ${CF_MAIN_SOURCES}
     ${CF_LIB_COMMON_SOURCES})
 
-target_link_libraries(cf_tracking ${OpenCV_LIBS})
+target_link_libraries(cf_tracking_lib ${OpenCV_LIBS})
