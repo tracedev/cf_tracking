@@ -43,7 +43,7 @@
 #include <opencv2/core/core.hpp>
 
 void shift(const cv::Mat& src, cv::Mat& dst, cv::Point2f delta,
-    int fill = cv::BORDER_CONSTANT,
-    cv::Scalar value = cv::Scalar(0, 0, 0, 0));
+           int fill = cv::BORDER_CONSTANT,
+           cv::Scalar value = cv::Scalar(0, 0, 0, 0));
 
 #endif

@@ -30,31 +30,17 @@ in Proc. BMVC, 2014.
 #include "gradientMex.hpp"
 #include "math_helper.hpp"
 
-namespace cf_tracking
-{
-    template<typename T>
-    struct ScaleEstimatorParas
-    {
-        ScaleEstimatorParas() : scaleCellSize(4),
-          scaleModelMaxArea(static_cast<T>(512)),
-          scaleStep(static_cast<T>(1.02)),
-          numberOfScales(33), 
-          scaleSigmaFactor(static_cast<T>(1.0/4.0)),
-          lambda(static_cast<T>(0.01)),
-          learningRate(static_cast<T>(0.025)),
-          useFhogTranspose(false),
-          resizeType(cv::INTER_LINEAR),
-          originalVersion(false)
-          {};
-
+namespace cf_tracking {
+    struct ScaleEstimatorParas {
+        ScaleEstimatorParas();
         int scaleCellSize;
-        T scaleModelMaxArea;
-        T scaleStep;
+        float scaleModelMaxArea;
+        float scaleStep;
         int numberOfScales;
-        T scaleSigmaFactor;
+        float scaleSigmaFactor;
 
-        T lambda;
-        T learningRate;
+        float lambda;
+        float learningRate;
 
         // testing
         bool useFhogTranspose;
@@ -62,226 +48,38 @@ namespace cf_tracking
         bool originalVersion;
     };
 
-    template<typename T>
-    class ScaleEstimator
-    {
+    class ScaleEstimator {
     public:
-        typedef typename FhogFeatureChannels<T>::type FFC;
-        typedef cv::Size_<T> Size;
-        typedef cv::Point_<T> Point;
-        typedef mat_consts::constants<T> consts;
+        typedef typename FhogFeatureChannels<float>::type FFC;
+        typedef cv::Size_<float> Size;
+        typedef cv::Point_<float> Point;
+        typedef mat_consts::constants<float> consts;
 
-        ScaleEstimator(ScaleEstimatorParas<T> paras) :
-            _frameIdx(0),
-            _isInitialized(false),
-            _scaleModelFactor(0),
-            fhogToCvCol(0),
-            _MIN_SCALE_FACTOR(static_cast<T>(0.01)),
-            _MAX_SCALE_FACTOR(static_cast<T>(40)),
-            _SCALE_CELL_SIZE(paras.scaleCellSize),
-            _SCALE_MODEL_MAX_AREA(paras.scaleModelMaxArea),
-            _SCALE_STEP(paras.scaleStep),
-            _N_SCALES(paras.numberOfScales),
-            _SCALE_SIGMA_FACTOR(paras.scaleSigmaFactor),
-            _LAMBDA(paras.lambda),
-            _LEARNING_RATE(paras.learningRate),
-            _TYPE(cv::DataType<T>::type),
-            _RESIZE_TYPE(paras.resizeType),
-            _ORIGINAL_VERSION(paras.originalVersion)
-        {
-            // init dft
-            cv::Mat initDft = (cv::Mat_<T>(1, 1) << 1);
-            dft(initDft, initDft);
-
-            if (paras.useFhogTranspose)
-                fhogToCvCol = &piotr::fhogToCvColT;
-            else
-                fhogToCvCol = &piotr::fhogToCol;
-        }
+        ScaleEstimator(ScaleEstimatorParas paras);
+        virtual ~ScaleEstimator();
 
         bool reinit(const cv::Mat& image, const Point& pos,
-            const Size& targetSize, const T& currentScaleFactor)
-        {
-            _targetSize = targetSize;
-            // scale filter output target
-            T scaleSigma = static_cast<T>(sqrt(_N_SCALES) * _SCALE_SIGMA_FACTOR);
-            cv::Mat colScales = numberToColVector<T>(_N_SCALES);
-            T scaleHalf = static_cast<T>(ceil(_N_SCALES / 2.0));
-
-            cv::Mat ss = colScales - scaleHalf;
-            cv::Mat ys;
-            exp(-0.5 * ss.mul(ss) / (scaleSigma * scaleSigma), ys);
-
-            cv::Mat ysf;
-            // always use CCS here; regular COMPLEX_OUTPUT is bugged
-            cv::dft(ys, ysf, cv::DFT_ROWS);
-
-            // scale filter cos window
-            if (_N_SCALES % 2 == 0)
-            {
-                _scaleWindow = hanningWindow<T>(_N_SCALES + 1);
-                _scaleWindow = _scaleWindow.rowRange(1, _scaleWindow.rows);
-            }
-            else
-            {
-                _scaleWindow = hanningWindow<T>(_N_SCALES);
-            }
-
-            ss = scaleHalf - colScales;
-            _scaleFactors = pow<T, T>(_SCALE_STEP, ss);
-            _scaleModelFactor = sqrt(_SCALE_MODEL_MAX_AREA / targetSize.area());
-            _scaleModelSz = sizeFloor(targetSize *  _scaleModelFactor);
-
-            // expand ysf to have the number of rows of scale samples
-            int ysfRow = static_cast<int>(floor(_scaleModelSz.width / _SCALE_CELL_SIZE)
-                * floor(_scaleModelSz.height / _SCALE_CELL_SIZE) * FFC::numberOfChannels());
-
-            _ysf = repeat(ysf, ysfRow, 1);
-
-            cv::Mat sfNum, sfDen;
-
-            if (getScaleTrainingData(image, pos,
-                currentScaleFactor, sfNum, sfDen) == false)
-                return false;
-
-            _sfNumerator = sfNum;
-            _sfDenominator = sfDen;
-
-            _isInitialized = true;
-            ++_frameIdx;
-            return true;
-        }
-
-        virtual ~ScaleEstimator(){}
+                    const Size& targetSize, const float& currentScaleFactor);
 
         bool detectScale(const cv::Mat& image, const Point& pos,
-            T& currentScaleFactor) const
-        {
-            cv::Mat xs;
-            if (getScaleFeatures(image, pos, xs, currentScaleFactor) == false)
-                return false;
-
-            cv::Mat xsf;
-            dft(xs, xsf, cv::DFT_ROWS);
-
-            mulSpectrums(_sfNumerator, xsf, xsf, cv::DFT_ROWS);
-            reduce(xsf, xsf, 0, cv::REDUCE_SUM, -1);
-
-            cv::Mat sfDenLambda;
-            sfDenLambda = addRealToSpectrum<T>(_LAMBDA, _sfDenominator, cv::DFT_ROWS);
-
-            cv::Mat responseSf;
-            divSpectrums(xsf, sfDenLambda, responseSf, cv::DFT_ROWS, false);
-
-            cv::Mat scaleResponse;
-            idft(responseSf, scaleResponse, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE | cv::DFT_ROWS);
-
-            cv::Point recoveredScale;
-            double maxScaleResponse;
-            minMaxLoc(scaleResponse, 0, &maxScaleResponse, 0, &recoveredScale);
-
-            currentScaleFactor *= _scaleFactors.at<T>(recoveredScale);
-
-            currentScaleFactor = std::max(currentScaleFactor, _MIN_SCALE_FACTOR);
-            currentScaleFactor = std::min(currentScaleFactor, _MAX_SCALE_FACTOR);
-            return true;
-        }
-
+                         float& currentScaleFactor) const;
         bool updateScale(const cv::Mat& image, const Point& pos,
-            const T& currentScaleFactor)
-        {
-            ++_frameIdx;
-            cv::Mat sfNum, sfDen;
-
-            if (getScaleTrainingData(image, pos, currentScaleFactor,
-                sfNum, sfDen) == false)
-                return false;
-
-            // both summands are in CCS packaged format; thus adding is OK
-            _sfDenominator = (1 - _LEARNING_RATE) * _sfDenominator + _LEARNING_RATE * sfDen;
-            _sfNumerator = (1 - _LEARNING_RATE) * _sfNumerator + _LEARNING_RATE * sfNum;
-            return true;
-        }
-
+                         const float& currentScaleFactor);
     private:
         bool getScaleTrainingData(const cv::Mat& image,
-            const Point& pos,
-            const T& currentScaleFactor,
-            cv::Mat& sfNum, cv::Mat& sfDen) const
-        {
-            cv::Mat xs;
-            if (getScaleFeatures(image, pos, xs, currentScaleFactor) == false)
-                return false;
-
-            cv::Mat xsf;
-            dft(xs, xsf, cv::DFT_ROWS);
-            mulSpectrums(_ysf, xsf, sfNum, cv::DFT_ROWS, true);
-            cv::Mat mulTemp;
-            mulSpectrums(xsf, xsf, mulTemp, cv::DFT_ROWS, true);
-            reduce(mulTemp, sfDen, 0, cv::REDUCE_SUM, -1);
-            return true;
-        }
+                                  const Point& pos,
+                                  const float& currentScaleFactor,
+                                  cv::Mat& sfNum, cv::Mat& sfDen) const;
 
         bool getScaleFeatures(const cv::Mat& image, const Point& pos,
-            cv::Mat& features, T scale) const
-        {
-            int colElems = _ysf.rows;
-            features = cv::Mat::zeros(colElems, _N_SCALES, _TYPE);
-            cv::Mat patch;
-            cv::Mat patchResized;
-            cv::Mat patchResizedFloat;
-            cv::Mat firstPatch;
-            T cosFactor = -1;
+                              cv::Mat& features, float scale) const;
 
-            // do not extract features for first and last scale,
-            // since the scaleWindow will always multiply these with 0;
-            // extract first required sub window separately; smaller scales are extracted
-            // from this patch to avoid multiple border replicates on out of image patches
-            int idxScale = 1;
-            T patchScale = scale * _scaleFactors.at<T>(0, idxScale);
-            Size firstPatchSize = sizeFloor(_targetSize * patchScale);
-            Point posInFirstPatch(0, 0);
-            cosFactor = _scaleWindow.at<T>(idxScale, 0);
-
-            if (getSubWindow(image, firstPatch, firstPatchSize, pos, &posInFirstPatch) == false)
-                return false;
-
-            if (_ORIGINAL_VERSION)
-                depResize(firstPatch, patchResized, _scaleModelSz);
-            else
-                cv::resize(firstPatch, patchResized, _scaleModelSz, 0, 0, _RESIZE_TYPE);
-
-            patchResized.convertTo(patchResizedFloat, CV_32FC(3));
-            fhogToCvCol(patchResizedFloat, features, _SCALE_CELL_SIZE, idxScale, cosFactor);
-
-            for (idxScale = 2; idxScale < _N_SCALES - 1; ++idxScale)
-            {
-                T patchScale = scale *_scaleFactors.at<T>(0, idxScale);
-                Size patchSize = sizeFloor(_targetSize * patchScale);
-                cosFactor = _scaleWindow.at<T>(idxScale, 0);
-
-                if (getSubWindow(firstPatch, patch, patchSize, posInFirstPatch) == false)
-                    return false;
-
-                if (_ORIGINAL_VERSION)
-                    depResize(patch, patchResized, _scaleModelSz);
-                else
-                    cv::resize(patch, patchResized, _scaleModelSz, 0, 0, _RESIZE_TYPE);
-
-                patchResized.convertTo(patchResizedFloat, CV_32FC(3));
-                fhogToCvCol(patchResizedFloat, features, _SCALE_CELL_SIZE, idxScale, cosFactor);
-            }
-
-            return true;
-        }
-
-    private:
         typedef void(*fhogToCvRowPtr)
-            (const cv::Mat& img, cv::Mat& cvFeatures, int binSize, int rowIdx, T cosFactor);
+        (const cv::Mat& img, cv::Mat& cvFeatures, int binSize, int rowIdx, float cosFactor);
         fhogToCvRowPtr fhogToCvCol;
 
         cv::Mat _scaleWindow;
-        T _scaleModelFactor;
+        float _scaleModelFactor;
         cv::Mat _sfNumerator;
         cv::Mat _sfDenominator;
         cv::Mat _scaleFactors;
@@ -293,16 +91,16 @@ namespace cf_tracking
 
         const int _TYPE;
         const int _SCALE_CELL_SIZE;
-        const T _SCALE_MODEL_MAX_AREA;
-        const T _SCALE_STEP;
+        const float _SCALE_MODEL_MAX_AREA;
+        const float _SCALE_STEP;
         const int _N_SCALES;
-        const T _SCALE_SIGMA_FACTOR;
-        const T _LAMBDA;
-        const T _LEARNING_RATE;
+        const float _SCALE_SIGMA_FACTOR;
+        const float _LAMBDA;
+        const float _LEARNING_RATE;
         const int _RESIZE_TYPE;
         // it should be possible to find more reasonable values for min/max scale; application dependent
-        T _MIN_SCALE_FACTOR;
-        T _MAX_SCALE_FACTOR;
+        float _MIN_SCALE_FACTOR;
+        float _MAX_SCALE_FACTOR;
 
         const bool _ORIGINAL_VERSION;
     };

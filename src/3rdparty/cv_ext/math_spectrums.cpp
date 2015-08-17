@@ -53,8 +53,7 @@
 #include "math_spectrums.hpp"
 
 void divSpectrums(cv::InputArray _numeratorA, cv::InputArray _denominatorB,
-    cv::OutputArray _dst, int flags, bool conjB)
-{
+                  cv::OutputArray _dst, int flags, bool conjB) {
     cv::Mat srcA = _numeratorA.getMat(), srcB = _denominatorB.getMat();
     int depth = srcA.depth(), cn = srcA.channels(), type = srcA.type();
     int rows = srcA.rows, cols = srcA.cols;
@@ -67,10 +66,10 @@ void divSpectrums(cv::InputArray _numeratorA, cv::InputArray _denominatorB,
     cv::Mat dst = _dst.getMat();
 
     bool is_1d = (flags & cv::DFT_ROWS) || (rows == 1 || (cols == 1 &&
-        srcA.isContinuous() && srcB.isContinuous() && dst.isContinuous()));
+                                            srcA.isContinuous() && srcB.isContinuous() && dst.isContinuous()));
 
     if (is_1d && !(flags & cv::DFT_ROWS))
-        cols = cols + rows - 1, rows = 1;
+    { cols = cols + rows - 1, rows = 1; }
 
     // complex number representation
     // http://mathworld.wolfram.com/ComplexDivision.html
@@ -78,12 +77,11 @@ void divSpectrums(cv::InputArray _numeratorA, cv::InputArray _denominatorB,
     // with v = (c^2 + d^2)
     double a = 0.0, b = 0.0, c = 0.0, d = 0.0, v = 0.0;
 
-    int ncols = cols*cn;
+    int ncols = cols * cn;
     int j0 = cn == 1;
     int j1 = ncols - (cols % 2 == 0 && cn == 1);
 
-    if (depth == CV_32F)
-    {
+    if (depth == CV_32F) {
         const float* dataA = srcA.ptr<float>();
         const float* dataB = srcB.ptr<float>();
         float* dataC = dst.ptr<float>();
@@ -92,97 +90,81 @@ void divSpectrums(cv::InputArray _numeratorA, cv::InputArray _denominatorB,
         size_t stepB = srcB.step / sizeof(dataB[0]);
         size_t stepC = dst.step / sizeof(dataC[0]);
 
-        if (!is_1d && cn == 1)
-        {
+        if (!is_1d && cn == 1) {
             // even: one loop execution
             // odd: two loop executions
-            for (k = 0; k < (cols % 2 ? 1 : 2); k++)
-            {
+            for (k = 0; k < (cols % 2 ? 1 : 2); k++) {
                 if (k == 1)
-                    dataA += cols - 1, dataB += cols - 1, dataC += cols - 1;
+                { dataA += cols - 1, dataB += cols - 1, dataC += cols - 1; }
 
                 // the following 2 elements do not have an imaginary part
                 // TODO: check precision
                 dataC[0] = dataA[0] / dataB[0];
 
                 if (rows % 2 == 0)
-                    dataC[(rows - 1)*stepC] = dataA[(rows - 1)*stepA] / dataB[(rows - 1)*stepB];
+                { dataC[(rows - 1)*stepC] = dataA[(rows - 1) * stepA] / dataB[(rows - 1) * stepB]; }
 
-                if (!conjB)
-                {
-                    for (j = 1; j <= rows - 2; j += 2)
-                    {
-                        a = (double)dataA[j*stepA];
-                        b = (double)dataA[(j + 1)*stepA];
-                        c = (double)dataB[j*stepB];
-                        d = (double)dataB[(j + 1)*stepB];
-                        v = (c*c) + (d*d);
+                if (!conjB) {
+                    for (j = 1; j <= rows - 2; j += 2) {
+                        a = (double)dataA[j * stepA];
+                        b = (double)dataA[(j + 1) * stepA];
+                        c = (double)dataB[j * stepB];
+                        d = (double)dataB[(j + 1) * stepB];
+                        v = (c * c) + (d * d);
 
-                        dataC[j*stepC] = (float)((a * c + b * d) / v);
+                        dataC[j * stepC] = (float)((a * c + b * d) / v);
                         dataC[(j + 1)*stepC] = (float)((b * c - a * d) / v);
                     }
-                }
-                else
-                {
-                    for (j = 1; j <= rows - 2; j += 2)
-                    {
-                        a = (double)dataA[j*stepA];
-                        b = -(double)dataA[(j + 1)*stepA];
-                        c = (double)dataB[j*stepB];
-                        d = -(double)dataB[(j + 1)*stepB];
-                        v = (c*c) + (d*d);
+                } else {
+                    for (j = 1; j <= rows - 2; j += 2) {
+                        a = (double)dataA[j * stepA];
+                        b = -(double)dataA[(j + 1) * stepA];
+                        c = (double)dataB[j * stepB];
+                        d = -(double)dataB[(j + 1) * stepB];
+                        v = (c * c) + (d * d);
 
-                        dataC[j*stepC] = (float)((a * c + b * d) / v);
+                        dataC[j * stepC] = (float)((a * c + b * d) / v);
                         dataC[(j + 1)*stepC] = (float)((b * c - a * d) / v);
                     }
                 }
 
                 if (k == 1)
-                    dataA -= cols - 1, dataB -= cols - 1, dataC -= cols - 1;
+                { dataA -= cols - 1, dataB -= cols - 1, dataC -= cols - 1; }
             }
         }
 
-        for (; rows--; dataA += stepA, dataB += stepB, dataC += stepC)
-        {
-            if (is_1d && cn == 1)
-            {
+        for (; rows--; dataA += stepA, dataB += stepB, dataC += stepC) {
+            if (is_1d && cn == 1) {
                 // first and last element in row -> no imaginary part
                 dataC[0] = dataA[0] / dataB[0];
 
                 if (cols % 2 == 0)
-                    dataC[j1] = dataA[j1] / dataB[j1];
+                { dataC[j1] = dataA[j1] / dataB[j1]; }
             }
 
-            if (!conjB)
-            {
-                for (j = j0; j < j1; j += 2)
-                {
+            if (!conjB) {
+                for (j = j0; j < j1; j += 2) {
                     a = (double)dataA[j];
                     b = (double)dataA[j + 1];
                     c = (double)dataB[j];
                     d = (double)dataB[j + 1];
-                    v = (c*c) + (d*d);
+                    v = (c * c) + (d * d);
                     dataC[j] = (float)((a * c + b * d) / v);
                     dataC[j + 1] = (float)((b * c - a * d) / v);
                 }
-            }
-            else
-            {
-                for (j = j0; j < j1; j += 2)
-                {
+            } else {
+                for (j = j0; j < j1; j += 2) {
                     a = (double)dataA[j];
                     b = -(double)dataA[j + 1];
                     c = (double)dataB[j];
                     d = -(double)dataB[j + 1];
-                    v = (c*c) + (d*d);
+                    v = (c * c) + (d * d);
                     dataC[j] = (float)((a * c + b * d) / v);
                     dataC[j + 1] = (float)((b * c - a * d) / v);
                 }
             }
         }
-    }
-    else
-    {
+    } else {
         const double* dataA = srcA.ptr<double>();
         const double* dataB = srcB.ptr<double>();
         double* dataC = dst.ptr<double>();
@@ -191,84 +173,70 @@ void divSpectrums(cv::InputArray _numeratorA, cv::InputArray _denominatorB,
         size_t stepB = srcB.step / sizeof(dataB[0]);
         size_t stepC = dst.step / sizeof(dataC[0]);
 
-        if (!is_1d && cn == 1)
-        {
-            for (k = 0; k < (cols % 2 ? 1 : 2); k++)
-            {
+        if (!is_1d && cn == 1) {
+            for (k = 0; k < (cols % 2 ? 1 : 2); k++) {
                 if (k == 1)
-                    dataA += cols - 1, dataB += cols - 1, dataC += cols - 1;
+                { dataA += cols - 1, dataB += cols - 1, dataC += cols - 1; }
 
                 dataC[0] = dataA[0] / dataB[0];
 
                 if (rows % 2 == 0)
-                    dataC[(rows - 1)*stepC] = dataA[(rows - 1)*stepA] / dataB[(rows - 1)*stepB];
+                { dataC[(rows - 1)*stepC] = dataA[(rows - 1) * stepA] / dataB[(rows - 1) * stepB]; }
 
-                if (!conjB)
-                {
-                    for (j = 1; j <= rows - 2; j += 2)
-                    {
-                        a = dataA[j*stepA];
-                        b = dataA[(j + 1)*stepA];
-                        c = dataB[j*stepB];
-                        d = dataB[(j + 1)*stepB];
-                        v = (c*c) + (d*d);
+                if (!conjB) {
+                    for (j = 1; j <= rows - 2; j += 2) {
+                        a = dataA[j * stepA];
+                        b = dataA[(j + 1) * stepA];
+                        c = dataB[j * stepB];
+                        d = dataB[(j + 1) * stepB];
+                        v = (c * c) + (d * d);
 
-                        dataC[j*stepC] = (a * c + b * d) / v;
+                        dataC[j * stepC] = (a * c + b * d) / v;
                         dataC[(j + 1)*stepC] = (b * c - a * d) / v;
                     }
-                }
-                else
-                {
-                    for (j = 1; j <= rows - 2; j += 2)
-                    {
-                        a = dataA[j*stepA];
-                        b = -dataA[(j + 1)*stepA];
-                        c = dataB[j*stepB];
-                        d = -dataB[(j + 1)*stepB];
-                        v = (c*c) + (d*d);
+                } else {
+                    for (j = 1; j <= rows - 2; j += 2) {
+                        a = dataA[j * stepA];
+                        b = -dataA[(j + 1) * stepA];
+                        c = dataB[j * stepB];
+                        d = -dataB[(j + 1) * stepB];
+                        v = (c * c) + (d * d);
 
-                        dataC[j*stepC] = (a * c + b * d) / v;
+                        dataC[j * stepC] = (a * c + b * d) / v;
                         dataC[(j + 1)*stepC] = (b * c - a * d) / v;
                     }
                 }
 
                 if (k == 1)
-                    dataA -= cols - 1, dataB -= cols - 1, dataC -= cols - 1;
+                { dataA -= cols - 1, dataB -= cols - 1, dataC -= cols - 1; }
             }
         }
 
-        for (; rows--; dataA += stepA, dataB += stepB, dataC += stepC)
-        {
-            if (is_1d && cn == 1)
-            {
+        for (; rows--; dataA += stepA, dataB += stepB, dataC += stepC) {
+            if (is_1d && cn == 1) {
                 dataC[0] = dataA[0] / dataB[0];
 
                 if (cols % 2 == 0)
-                    dataC[j1] = dataA[j1] / dataB[j1];
+                { dataC[j1] = dataA[j1] / dataB[j1]; }
             }
 
-            if (!conjB)
-            {
-                for (j = j0; j < j1; j += 2)
-                {
+            if (!conjB) {
+                for (j = j0; j < j1; j += 2) {
                     a = dataA[j];
                     b = dataA[j + 1];
                     c = dataB[j];
                     d = dataB[j + 1];
-                    v = (c*c) + (d*d);
+                    v = (c * c) + (d * d);
                     dataC[j] = (a * c + b * d) / v;
                     dataC[j + 1] = (b * c - a * d) / v;
                 }
-            }
-            else
-            {
-                for (j = j0; j < j1; j += 2)
-                {
+            } else {
+                for (j = j0; j < j1; j += 2) {
                     a = dataA[j];
                     b = -dataA[j + 1];
                     c = dataB[j];
                     d = -dataB[j + 1];
-                    v = (c*c) + (d*d);
+                    v = (c * c) + (d * d);
                     dataC[j] = (a * c + b * d) / v;
                     dataC[j + 1] = (b * c - a * d) / v;
                 }

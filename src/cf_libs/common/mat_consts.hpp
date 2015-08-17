@@ -1,11 +1,9 @@
 #ifndef MAT_CONSTS_H_
 #define MAT_CONSTS_H_
 
-namespace mat_consts
-{
+namespace mat_consts {
     template<class T>
-    struct constants
-    {
+    struct constants {
         const static T c0_5;
         const static T c2_0;
     };

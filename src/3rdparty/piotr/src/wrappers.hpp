@@ -42,17 +42,17 @@ either expressed or implied, of the FreeBSD Project.
 #include <cstdlib>
 
 // wrapper functions if compiling from C/C++
-inline void wrError(const char *errormsg) { throw errormsg; }
+inline void wrError(const char* errormsg) { throw errormsg; }
 inline void* wrCalloc(size_t num, size_t size) { return calloc(num, size); }
 inline void* wrMalloc(size_t size) { return malloc(size); }
-inline void wrFree(void * ptr) { free(ptr); }
+inline void wrFree(void* ptr) { free(ptr); }
 
 // platform independent aligned memory allocation (see also alFree)
 inline void* alMalloc(size_t size, int alignment) {
     const size_t pSize = sizeof(void*);
     const size_t a = alignment - 1;
-    void *raw = wrMalloc(size + a + pSize);
-    void *aligned = (void*)(((size_t)raw + pSize + a) & ~a);
+    void* raw = wrMalloc(size + a + pSize);
+    void* aligned = (void*)(((size_t)raw + pSize + a) & ~a);
     *(void**)((size_t)aligned - pSize) = raw;
     return aligned;
 }
