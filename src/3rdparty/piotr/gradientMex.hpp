@@ -48,18 +48,17 @@ TODO:
 #include "wrappers.hpp"
 
 namespace piotr {
-    void fhog(float * const M, float * const O,
-        float * const H, int h, int w, int binSize,
-        int nOrients, int softBin, float clip,
-        bool calcEnergy = true);
+    void fhog(float* const M, float* const O,
+              float* const H, int h, int w, int binSize,
+              int nOrients, int softBin, float clip,
+              bool calcEnergy = true);
 
-    void gradMag(float * const I, float * const M,
-        float * const O, int h, int w, int d, bool full);
+    void gradMag(float* const I, float* const M,
+                 float* const O, int h, int w, int d, bool full);
 
     template<typename PRIMITIVE_TYPE>
     void fhogToCol(const cv::Mat& img, cv::Mat& cvFeatures,
-        int binSize, int colIdx, PRIMITIVE_TYPE cosFactor)
-    {
+                   int binSize, int colIdx, PRIMITIVE_TYPE cosFactor) {
         const int orientations = 9;
         // ensure array is continuous
         const cv::Mat& image = (img.isContinuous() ? img : img.clone());
@@ -86,10 +85,8 @@ namespace piotr {
         float* const blueChannel = I + 2 * width * height;
         int colMajorPos = 0, rowMajorPos = 0;
 
-        for (int row = 0; row < height; ++row)
-        {
-            for (int col = 0; col < width; ++col)
-            {
+        for (int row = 0; row < height; ++row) {
+            for (int col = 0; col < width; ++col) {
                 colMajorPos = col * height + row;
                 rowMajorPos = row * channels * width + col * channels;
 
@@ -111,7 +108,7 @@ namespace piotr {
         int outputWidth = cvFeatures.cols;
 
         for (int row = 0; row < cvFeatures.rows; ++row)
-            cdata[outputWidth*row + colIdx] = H[row] * cosFactor;
+        { cdata[outputWidth * row + colIdx] = H[row] * cosFactor; }
 
         wrFree(H);
         wrFree(M);
@@ -121,8 +118,7 @@ namespace piotr {
 
     template<typename PRIMITIVE_TYPE>
     void fhogToCvColT(const cv::Mat& img, cv::Mat& cvFeatures,
-        int binSize, int colIdx, PRIMITIVE_TYPE cosFactor)
-    {
+                      int binSize, int colIdx, PRIMITIVE_TYPE cosFactor) {
         const int orientations = 9;
         // ensure array is continuous
         const cv::Mat& image = (img.isContinuous() ? img : img.clone());
@@ -143,17 +139,15 @@ namespace piotr {
         float* I = NULL;
 
         if (channels == 1)
-            I = reinterpret_cast<float*>(image.data);
-        else
-        {
+        { I = reinterpret_cast<float*>(image.data); }
+        else {
             I = (float*)wrCalloc(static_cast<size_t>(width * height * channels), sizeof(float));
             float* imageData = reinterpret_cast<float*>(image.data);
             float* redChannel = I;
             float* greenChannel = I + width * height;
             float* blueChannel = I + 2 * width * height;
 
-            for (int i = 0; i < height * width; ++i)
-            {
+            for (int i = 0; i < height * width; ++i) {
                 blueChannel[i] = imageData[i * 3];
                 greenChannel[i] = imageData[i * 3 + 1];
                 redChannel[i] = imageData[i * 3 + 2];
@@ -172,19 +166,18 @@ namespace piotr {
         int outputWidth = cvFeatures.cols;
 
         for (int row = 0; row < cvFeatures.rows; ++row)
-            cdata[outputWidth*row + colIdx] = H[row] * cosFactor;
+        { cdata[outputWidth * row + colIdx] = H[row] * cosFactor; }
 
         wrFree(H);
         wrFree(M);
         wrFree(O);
 
         if (channels != 1)
-            wrFree(I);
+        { wrFree(I); }
     }
 
     template<typename PRIMITIVE_TYPE, class OUT>
-    void cvFhog(const cv::Mat& img, std::shared_ptr<OUT>& cvFeatures, int binSize, int fhogChannelsToCopy = 31)
-    {
+    void cvFhog(const cv::Mat& img, std::shared_ptr<OUT>& cvFeatures, int binSize, int fhogChannelsToCopy = 31) {
         const int orientations = 9;
         // ensure array is continuous
         const cv::Mat& image = (img.isContinuous() ? img : img.clone());
@@ -208,10 +201,8 @@ namespace piotr {
         float* const blueChannel = I + 2 * width * height;
         int colMajorPos = 0, rowMajorPos = 0;
 
-        for (int row = 0; row < height; ++row)
-        {
-            for (int col = 0; col < width; ++col)
-            {
+        for (int row = 0; row < height; ++row) {
+            for (int col = 0; col < width; ++col) {
                 colMajorPos = col * height + row;
                 rowMajorPos = row * channels * width + col * channels;
 
@@ -225,31 +216,30 @@ namespace piotr {
         gradMag(I, M, O, height, width, channels, true);
 
         if (fhogChannelsToCopy == 27)
-            fhog(M, O, H, height, width, binSize, orientations, -1, 0.2f, false);
+        { fhog(M, O, H, height, width, binSize, orientations, -1, 0.2f, false); }
         else
-            fhog(M, O, H, height, width, binSize, orientations, -1, 0.2f);
+        { fhog(M, O, H, height, width, binSize, orientations, -1, 0.2f); }
 
         // only copy the amount of the channels the user wants
         // or the amount that fits into the output array
         int channelsToCopy = std::min(fhogChannelsToCopy, OUT::numberOfChannels());
 
-        for (int c = 0; c < channelsToCopy; ++c)
-        {
+        for (int c = 0; c < channelsToCopy; ++c) {
             cv::Mat_<PRIMITIVE_TYPE> m(heightBin, widthBin);
             cvFeatures->channels[c] = m;
         }
 
         PRIMITIVE_TYPE* cdata = 0;
+
         //col major to row major with separate channels
-        for (int c = 0; c < channelsToCopy; ++c)
-        {
+        for (int c = 0; c < channelsToCopy; ++c) {
             float* Hc = H + widthBin * heightBin * c;
             cdata = reinterpret_cast<PRIMITIVE_TYPE*>(cvFeatures->channels[c].data);
 
             for (int row = 0; row < heightBin; ++row)
                 for (int col = 0; col < widthBin; ++col)
 
-                    cdata[row * widthBin + col] = Hc[row + heightBin * col];
+                { cdata[row * widthBin + col] = Hc[row + heightBin * col]; }
         }
 
         wrFree(M);
@@ -259,8 +249,7 @@ namespace piotr {
     }
 
     template<typename PRIMITIVE_TYPE, class OUT>
-    void cvFhogT(const cv::Mat& img, std::shared_ptr<OUT>& cvFeatures, int binSize, int fhogChannelsToCopy = 31)
-    {
+    void cvFhogT(const cv::Mat& img, std::shared_ptr<OUT>& cvFeatures, int binSize, int fhogChannelsToCopy = 31) {
         const int orientations = 9;
         // ensure array is continuous
         const cv::Mat& image = (img.isContinuous() ? img : img.clone());
@@ -281,17 +270,15 @@ namespace piotr {
         float* I = NULL;
 
         if (channels == 1)
-            I = reinterpret_cast<float*>(image.data);
-        else
-        {
+        { I = reinterpret_cast<float*>(image.data); }
+        else {
             I = (float*)wrCalloc(static_cast<size_t>(width * height * channels), sizeof(float));
             float* imageData = reinterpret_cast<float*>(image.data);
             float* redChannel = I;
             float* greenChannel = I + width * height;
             float* blueChannel = I + 2 * width * height;
 
-            for (int i = 0; i < height * width; ++i)
-            {
+            for (int i = 0; i < height * width; ++i) {
                 blueChannel[i] = imageData[i * 3];
                 greenChannel[i] = imageData[i * 3 + 1];
                 redChannel[i] = imageData[i * 3 + 2];
@@ -302,37 +289,36 @@ namespace piotr {
         gradMag(I, M, O, width, height, channels, true);
 
         if (fhogChannelsToCopy == 27)
-            fhog(M, O, H, width, height, binSize, orientations, -1, 0.2f, false);
+        { fhog(M, O, H, width, height, binSize, orientations, -1, 0.2f, false); }
         else
-            fhog(M, O, H, width, height, binSize, orientations, -1, 0.2f);
+        { fhog(M, O, H, width, height, binSize, orientations, -1, 0.2f); }
 
         // only copy the amount of the channels the user wants
         // or the amount that fits into the output array
         int channelsToCopy = std::min(fhogChannelsToCopy, OUT::numberOfChannels());
 
         // init channels
-        for (int c = 0; c < channelsToCopy; ++c)
-        {
+        for (int c = 0; c < channelsToCopy; ++c) {
             cv::Mat_<PRIMITIVE_TYPE> m(heightBin, widthBin);
             cvFeatures->channels[c] = m;
         }
 
         PRIMITIVE_TYPE* cdata = 0;
+
         // implicit transpose on every channel due to col-major to row-major matrix
-        for (int c = 0; c < channelsToCopy; ++c)
-        {
+        for (int c = 0; c < channelsToCopy; ++c) {
             float* Hc = H + widthBin * heightBin * c;
             cdata = reinterpret_cast<PRIMITIVE_TYPE*>(cvFeatures->channels[c].data);
 
             for (int i = 0; i < heightBin * widthBin; ++i)
-                cdata[i] = Hc[i];
+            { cdata[i] = Hc[i]; }
         }
 
         wrFree(M);
         wrFree(O);
 
         if (channels != 1)
-            wrFree(I);
+        { wrFree(I); }
 
         wrFree(H);
     }

@@ -36,12 +36,14 @@ set(CF_PIOTR_SOURCES
 
 set(CF_LIB_COMMON_SOURCES
     src/cf_libs/common/math_helper.cpp
+    src/cf_libs/common/scale_estimator.cpp
     ${CF_CV_EXT_DIR}/shift.cpp
     ${CF_CV_EXT_DIR}/math_spectrums.cpp
     ${CF_PIOTR_SOURCES})
 
 set(CF_MAIN_SOURCES
-    src/main/image_acquisition.cpp)
+    src/cf_libs/dsst/dsst_tracker.cpp
+    src/cf_libs/kcf/kcf_tracker.cpp)
 
 add_library(cf_tracking STATIC
     ${CF_MAIN_SOURCES}

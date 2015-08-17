@@ -50,7 +50,7 @@
  * Given a matrix and an integer (x,y) offset, the matrix will be shifted
  * such that:
  *
- * 	src(a,b) ---> dst(a+y,b+x)
+ *  src(a,b) ---> dst(a+y,b+x)
  *
  * In the case of a non-integer offset, (e.g. cv::Point2f(-2.1, 3.7)),
  * the shift will be calculated with subpixel precision using bilinear
@@ -67,22 +67,22 @@
  *
  * Some common examples are provided following:
  * \code
- * 	// read an image from file
- * 	Mat mat = imread(filename);
- * 	Mat dst;
+ *  // read an image from file
+ *  Mat mat = imread(filename);
+ *  Mat dst;
  *
- * 	// Perform Matlab-esque 'circshift' in-place
- * 	shift(mat, mat, Point(5, 5), BORDER_WRAP);
+ *  // Perform Matlab-esque 'circshift' in-place
+ *  shift(mat, mat, Point(5, 5), BORDER_WRAP);
  *
- * 	// Perform shift with subpixel accuracy, padding the missing pixels with 1s
- * 	// NOTE: if mat is of type CV_8U, then it will be converted to type CV_32F
- * 	shift(mat, mat, Point2f(-13.7, 3.28), BORDER_CONSTANT, 1);
+ *  // Perform shift with subpixel accuracy, padding the missing pixels with 1s
+ *  // NOTE: if mat is of type CV_8U, then it will be converted to type CV_32F
+ *  shift(mat, mat, Point2f(-13.7, 3.28), BORDER_CONSTANT, 1);
  *
- * 	// Perform subpixel shift, preserving the boundary values
- * 	shift(mat, dst, Point2f(0.093, 0.125), BORDER_REPLICATE);
+ *  // Perform subpixel shift, preserving the boundary values
+ *  shift(mat, dst, Point2f(0.093, 0.125), BORDER_REPLICATE);
  *
- * 	// Perform a vanilla shift, integer offset, very fast
- * 	shift(mat, dst, Point(2, 2));
+ *  // Perform a vanilla shift, integer offset, very fast
+ *  shift(mat, dst, Point(2, 2));
  * \endcode
  *
  * @param src the source matrix
@@ -104,39 +104,44 @@ void shift(const cv::Mat& src, cv::Mat& dst, cv::Point2f delta, int fill, cv::Sc
     // INTEGER SHIFT
     // first create a border around the parts of the Mat that will be exposed
     int t = 0, b = 0, l = 0, r = 0;
-    if (deltai.x > 0) l = deltai.x;
-    if (deltai.x < 0) r = -deltai.x;
-    if (deltai.y > 0) t = deltai.y;
-    if (deltai.y < 0) b = -deltai.y;
+
+    if (deltai.x > 0) { l = deltai.x; }
+
+    if (deltai.x < 0) { r = -deltai.x; }
+
+    if (deltai.y > 0) { t = deltai.y; }
+
+    if (deltai.y < 0) { b = -deltai.y; }
+
     cv::Mat padded;
     cv::copyMakeBorder(src, padded, t, b, l, r, fill, value);
 
     // SUBPIXEL SHIFT
     float eps = std::numeric_limits<float>::epsilon();
+
     if (deltasub.x > eps || deltasub.y > eps) {
         switch (src.depth()) {
-        case CV_32F:
-        {
-            cv::Matx<float, 1, 2> dx(1 - deltasub.x, deltasub.x);
-            cv::Matx<float, 2, 1> dy(1 - deltasub.y, deltasub.y);
-            sepFilter2D(padded, padded, -1, dx, dy, cv::Point(0, 0), 0, cv::BORDER_CONSTANT);
-            break;
-        }
-        case CV_64F:
-        {
-            cv::Matx<double, 1, 2> dx(1 - deltasub.x, deltasub.x);
-            cv::Matx<double, 2, 1> dy(1 - deltasub.y, deltasub.y);
-            sepFilter2D(padded, padded, -1, dx, dy, cv::Point(0, 0), 0, cv::BORDER_CONSTANT);
-            break;
-        }
-        default:
-        {
-            cv::Matx<float, 1, 2> dx(1 - deltasub.x, deltasub.x);
-            cv::Matx<float, 2, 1> dy(1 - deltasub.y, deltasub.y);
-            padded.convertTo(padded, CV_32F);
-            sepFilter2D(padded, padded, CV_32F, dx, dy, cv::Point(0, 0), 0, cv::BORDER_CONSTANT);
-            break;
-        }
+            case CV_32F: {
+                cv::Matx<float, 1, 2> dx(1 - deltasub.x, deltasub.x);
+                cv::Matx<float, 2, 1> dy(1 - deltasub.y, deltasub.y);
+                sepFilter2D(padded, padded, -1, dx, dy, cv::Point(0, 0), 0, cv::BORDER_CONSTANT);
+                break;
+            }
+
+            case CV_64F: {
+                cv::Matx<double, 1, 2> dx(1 - deltasub.x, deltasub.x);
+                cv::Matx<double, 2, 1> dy(1 - deltasub.y, deltasub.y);
+                sepFilter2D(padded, padded, -1, dx, dy, cv::Point(0, 0), 0, cv::BORDER_CONSTANT);
+                break;
+            }
+
+            default: {
+                cv::Matx<float, 1, 2> dx(1 - deltasub.x, deltasub.x);
+                cv::Matx<float, 2, 1> dy(1 - deltasub.y, deltasub.y);
+                padded.convertTo(padded, CV_32F);
+                sepFilter2D(padded, padded, CV_32F, dx, dy, cv::Point(0, 0), 0, cv::BORDER_CONSTANT);
+                break;
+            }
         }
     }
 

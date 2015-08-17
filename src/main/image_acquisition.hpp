@@ -3,8 +3,7 @@
 
 #include "opencv2/highgui/highgui.hpp"
 
-struct ImgAcqParas
-{
+struct ImgAcqParas {
     ImgAcqParas() : isMock(false), device(-1), sequencePath(""), expansionStr("") {}
     bool isMock;
     int device;
@@ -12,8 +11,7 @@ struct ImgAcqParas
     std::string expansionStr;
 };
 
-class VideoCaptureMock
-{
+class VideoCaptureMock {
 public:
     VideoCaptureMock();
 
@@ -32,8 +30,7 @@ private:
     cv::Mat _staticImage;
 };
 
-class ImageAcquisition
-{
+class ImageAcquisition {
 public:
     ImageAcquisition();
 

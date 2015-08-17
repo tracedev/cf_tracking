@@ -3,18 +3,15 @@
 #include "kcf_tracker.hpp"
 #include "tracker_run.hpp"
 
-class KcfTrackerRun : public TrackerRun
-{
+class KcfTrackerRun : public TrackerRun {
 public:
     KcfTrackerRun() : TrackerRun("KCFcpp")
     {}
 
-    virtual ~KcfTrackerRun()
-    {
+    virtual ~KcfTrackerRun() {
     }
 
-    virtual cf_tracking::CfTracker* parseTrackerParas(TCLAP::CmdLine& cmd, int argc, const char** argv)
-    {
+    virtual cf_tracking::CfTracker* parseTrackerParas(TCLAP::CmdLine& cmd, int argc, const char** argv) {
         cf_tracking::KcfParameters paras;
         TCLAP::SwitchArg originalVersion("", "original_version", "Parameters and performance as close to the KCF VOT version as possible.", cmd, false);
         TCLAP::SwitchArg originalParametersWithScaleFilter("", "original_parameters_scale_filter", "KCF VOT version parameters with DSST scale filter.", cmd, false);
@@ -28,12 +25,12 @@ public:
         TCLAP::ValueArg<double> interpFactor("", "para_interpFactor", "interpolation factor for learning", false, paras.interpFactor, "double", cmd);
         TCLAP::ValueArg<double> kernelSigma("", "para_kernel_sigma", "sigma for Gaussian kernel", false, paras.kernelSigma, "double", cmd);
         TCLAP::ValueArg<double> psrThreshold("", "para_psr_threshold", "if psr is lower than "
-            "psr threshold, target is assumed to be lost", false, paras.psrThreshold, "double", cmd);
+                                             "psr threshold, target is assumed to be lost", false, paras.psrThreshold, "double", cmd);
         TCLAP::ValueArg<int> psrPeakDel("", "para_psr_peak_del", "amount of pixels that are "
-            "deleted for psr calculation around the peak (1 means that a window of 3 by 3 is "
-            "deleted; 0 means that max response is deleted; 2 * peak_del + 1 pixels are deleted)", false, paras.psrPeakDel, "integer", cmd);
+                                        "deleted for psr calculation around the peak (1 means that a window of 3 by 3 is "
+                                        "deleted; 0 means that max response is deleted; 2 * peak_del + 1 pixels are deleted)", false, paras.psrPeakDel, "integer", cmd);
         TCLAP::SwitchArg useDsstScale("", "para_use_dsst_scale", "Uses the DSST scale filter for scale estimation. "
-            "Disable for more speed!", cmd, paras.useDsstScaleEstimation);
+                                      "Disable for more speed!", cmd, paras.useDsstScaleEstimation);
         TCLAP::ValueArg<double> scaleSigmaFactor("", "para_dsst_sigma_factor", "DSST: spatial bandwidth of the target", false, paras.scaleSigmaFactor, "double", cmd);
         TCLAP::ValueArg<double> scaleEstimatorStep("", "para_dsst_scale_step", "DSST: scale step", false, paras.scaleEstimatorStep, "double", cmd);
         TCLAP::ValueArg<double> scaleLambda("", "para_dsst_lambda", "DSST: regularization for scale estimation", false, paras.scaleLambda, "double", cmd);
@@ -63,8 +60,7 @@ public:
         paras.scaleCellSize = scaleCellSize.getValue();
         paras.numberOfScales = numberOfScales.getValue();
 
-        if (originalVersion.getValue() || originalParametersWithScaleFilter.getValue())
-        {
+        if (originalVersion.getValue() || originalParametersWithScaleFilter.getValue()) {
             paras.padding = 1.5;
             paras.lambda = 0.0001;
             paras.outputSigmaFactor = 0.1;
@@ -78,13 +74,10 @@ public:
 
             paras.enableTrackingLossDetection = false;
 
-            if (originalParametersWithScaleFilter.getValue())
-            {
+            if (originalParametersWithScaleFilter.getValue()) {
                 paras.useVotScaleEstimation = false;
                 paras.useDsstScaleEstimation = true;
-            }
-            else
-            {
+            } else {
                 paras.useVotScaleEstimation = true;
                 paras.useDsstScaleEstimation = false;
             }
@@ -96,12 +89,11 @@ public:
     }
 };
 
-int main(int argc, const char** argv)
-{
+int main(int argc, const char** argv) {
     KcfTrackerRun mainObj;
 
     if (!mainObj.start(argc, argv))
-        return -1;
+    { return -1; }
 
     return 0;
 }
