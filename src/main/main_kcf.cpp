@@ -1,39 +1,7 @@
-/*
-// License Agreement (3-clause BSD License)
-// Copyright (c) 2015, Klaus Haag, all rights reserved.
-// Third party copyrights and patents are property of their respective owners.
-//
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
-//
-// * Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimer.
-//
-// * Redistributions in binary form must reproduce the above copyright notice,
-//   this list of conditions and the following disclaimer in the documentation
-//   and/or other materials provided with the distribution.
-//
-// * Neither the names of the copyright holders nor the names of the contributors
-//   may be used to endorse or promote products derived from this software
-//   without specific prior written permission.
-//
-// This software is provided by the copyright holders and contributors "as is" and
-// any express or implied warranties, including, but not limited to, the implied
-// warranties of merchantability and fitness for a particular purpose are disclaimed.
-// In no event shall copyright holders or contributors be liable for any direct,
-// indirect, incidental, special, exemplary, or consequential damages
-// (including, but not limited to, procurement of substitute goods or services;
-// loss of use, data, or profits; or business interruption) however caused
-// and on any theory of liability, whether in contract, strict liability,
-// or tort (including negligence or otherwise) arising in any way out of
-// the use of this software, even if advised of the possibility of such damage.
-*/
-
 #include <tclap/CmdLine.h>
 #include <iostream>
 #include "kcf_tracker.hpp"
 #include "tracker_run.hpp"
-#include "kcf_debug.hpp"
 
 class KcfTrackerRun : public TrackerRun
 {
@@ -48,7 +16,6 @@ public:
     virtual cf_tracking::CfTracker* parseTrackerParas(TCLAP::CmdLine& cmd, int argc, const char** argv)
     {
         cf_tracking::KcfParameters paras;
-        TCLAP::SwitchArg debugOutput("v", "debug", "Output Debug info!", cmd, false);
         TCLAP::SwitchArg originalVersion("", "original_version", "Parameters and performance as close to the KCF VOT version as possible.", cmd, false);
         TCLAP::SwitchArg originalParametersWithScaleFilter("", "original_parameters_scale_filter", "KCF VOT version parameters with DSST scale filter.", cmd, false);
         TCLAP::ValueArg<int> templateSize("", "para_template_size", "template size", false, paras.templateSize, "integer", cmd);
@@ -125,17 +92,8 @@ public:
             paras.useFhogTranspose = false;
         }
 
-        if (debugOutput.getValue())
-        {
-            setTrackerDebug(&_debug);
-            return new cf_tracking::KcfTracker(paras, &_debug);
-        }
-
         return new cf_tracking::KcfTracker(paras);
     }
-
-private:
-    cf_tracking::KcfDebug<cf_tracking::KcfTracker::T> _debug;
 };
 
 int main(int argc, const char** argv)

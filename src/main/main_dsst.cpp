@@ -1,34 +1,3 @@
-/*
-// License Agreement (3-clause BSD License)
-// Copyright (c) 2015, Klaus Haag, all rights reserved.
-// Third party copyrights and patents are property of their respective owners.
-//
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
-//
-// * Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimer.
-//
-// * Redistributions in binary form must reproduce the above copyright notice,
-//   this list of conditions and the following disclaimer in the documentation
-//   and/or other materials provided with the distribution.
-//
-// * Neither the names of the copyright holders nor the names of the contributors
-//   may be used to endorse or promote products derived from this software
-//   without specific prior written permission.
-//
-// This software is provided by the copyright holders and contributors "as is" and
-// any express or implied warranties, including, but not limited to, the implied
-// warranties of merchantability and fitness for a particular purpose are disclaimed.
-// In no event shall copyright holders or contributors be liable for any direct,
-// indirect, incidental, special, exemplary, or consequential damages
-// (including, but not limited to, procurement of substitute goods or services;
-// loss of use, data, or profits; or business interruption) however caused
-// and on any theory of liability, whether in contract, strict liability,
-// or tort (including negligence or otherwise) arising in any way out of
-// the use of this software, even if advised of the possibility of such damage.
-*/
-
 #include <tclap/CmdLine.h>
 #include <iostream>
 #include "dsst_tracker.hpp"
@@ -46,7 +15,6 @@ public:
     virtual cf_tracking::CfTracker* parseTrackerParas(TCLAP::CmdLine& cmd, int argc, const char** argv)
     {
         cf_tracking::DsstParameters paras;
-        TCLAP::SwitchArg debugOutput("v", "debug", "Output Debug info!", cmd, false);
         TCLAP::SwitchArg originalVersion("", "original_version", "Use the original parameters found in the DSST paper. Performance is close, "
             "but differences do still exist!", cmd, false);
         TCLAP::ValueArg<int> templateSize("", "para_template_size", "template size", false,
@@ -115,17 +83,8 @@ public:
             paras.resizeType = cv::INTER_AREA;
         }
 
-        if (debugOutput.getValue())
-        {
-            setTrackerDebug(&_debug);
-            return new cf_tracking::DsstTracker(paras, &_debug);
-        }
-
         return new cf_tracking::DsstTracker(paras);
     }
-
-private:
-    cf_tracking::DsstDebug<cf_tracking::DsstTracker::T> _debug;
 };
 
 int main(int argc, const char** argv)
