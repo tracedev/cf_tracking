@@ -1,16 +1,13 @@
-# Introduction
+# CF_Tracking
+This is a fork of [cf_tracking](https://github.com/klahaag/cf_tracking), meant for use as a library.
 
-This repository provides C++ implementations for two correlation filter-based trackers. The code implements modified versions of the
-visual trackers proposed in [1] and [2]:
-* KCFcpp: This tracker is a C++ port of the Matlab implementation of the kernelized correlation filter (KCF) tracker proposed in [1]. Project webpage:  http://home.isr.uc.pt/~henriques/circulant/ KCFcpp uses as default scale adaption the 1D scale filter proposed in [2]. In addition, a fixed template size,
-the subpixel/subcell response peak estimation, and the model update from [3] is used as in the KCF version used by Henriques et al. in the VOT challenge 2014 (http://votchallenge.net/vot2014/). The scale adaption used by Henriques et al. in the VOT challenge 2014 is available as option.
-* DSSTcpp: This tracker is a C++ port of the Matlab implementation of the discriminative scale space tracker (DSST) proposed in [2]. The default settings
-use a fixed template size and the subpixel/cell response peak estimation as in
-the KCF version. Project webpage: http://www.cvl.isy.liu.se/en/research/objrec/visualtracking/scalvistrack/index.html
+This repository provides C++ implementations for two correlation filter-based trackers. The code implements modified versions of the visual trackers proposed in [1] and [2]:
+- KCFcpp: This tracker is a C++ port of the Matlab implementation of the kernelized correlation filter (KCF) tracker proposed in [1]. Project webpage:  http://home.isr.uc.pt/~henriques/circulant/ KCFcpp uses as default scale adaption the 1D scale filter proposed in [2]. In addition, a fixed template size, the subpixel/subcell response peak estimation, and the model update from [3] is used as in the KCF version used by Henriques et al. in the VOT challenge 2014 (http://votchallenge.net/vot2014/). The scale adaption used by Henriques et al. in the VOT challenge 2014 is available as option.
+- DSSTcpp: This tracker is a C++ port of the Matlab implementation of the discriminative scale space tracker (DSST) proposed in [2]. The default settings use a fixed template size and the subpixel/cell response peak estimation as in the KCF version. Project webpage: http://www.cvl.isy.liu.se/en/research/objrec/visualtracking/scalvistrack/index.html
 
 Both implementations use the FHOG features proposed in [4].
 
-More specifically, the FHOG implementation  from [5] is used.
+More specifically, the FHOG implementation from [5] is used.
 
 Both trackers offer the option to use the target loss detection proposed in [6].
 
