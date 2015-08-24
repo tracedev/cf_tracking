@@ -109,6 +109,8 @@ namespace cf_tracking {
         virtual bool update(const cv::Mat& image, cv::Rect_<int>& boundingBox);
         virtual bool updateAt(const cv::Mat& image, cv::Rect_<int>& boundingBox);
         virtual const std::string getId();
+        virtual bool get_found();
+
 
     private:
         bool reinit_(const cv::Mat& image, Rect& boundingBox);
@@ -170,8 +172,9 @@ namespace cf_tracking {
         const int _RESIZE_TYPE;
         const std::string _ID;
         const bool _USE_VOT_SCALE_ESTIMATION;
-        const bool _ENABLE_TRACKING_LOSS_DETECTION;
         const bool _USE_CCS;
+        bool _FOUND;
+
         // it should be possible to find more reasonable values for min/max scale; application dependent
         T _VOT_MIN_SCALE_FACTOR;
         T _VOT_MAX_SCALE_FACTOR;

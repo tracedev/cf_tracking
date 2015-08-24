@@ -40,7 +40,6 @@ KcfTracker::KcfTracker(KcfParameters paras)
       _PIXEL_PADDING(paras.pixelPadding),
       _N_SCALES_VOT(3),
       _USE_VOT_SCALE_ESTIMATION(paras.useVotScaleEstimation),
-      _ENABLE_TRACKING_LOSS_DETECTION(paras.enableTrackingLossDetection),
       _PSR_THRESHOLD(static_cast<T>(paras.psrThreshold)),
       _PSR_PEAK_DEL(paras.psrPeakDel),
       _MIN_AREA(10),
@@ -413,11 +412,7 @@ bool KcfTracker::updateAtScalePos(const cv::Mat& image, const Point& oldPos, con
     tempBoundingBox.x = newPos.x - tempBoundingBox.width / 2;
     tempBoundingBox.y = newPos.y - tempBoundingBox.height / 2;
 
-    if (_ENABLE_TRACKING_LOSS_DETECTION) {
-        if (evalReponse(image, response, maxResponseIdx,
-                        tempBoundingBox) == false)
-        { return false; }
-    }
+    _FOUND = evalReponse(image, response, maxResponseIdx,tempBoundingBox);
 
     if (updateModel(image, newPos, newScale) == false)
     { return false; }
@@ -426,6 +421,10 @@ bool KcfTracker::updateAtScalePos(const cv::Mat& image, const Point& oldPos, con
     boundingBox = tempBoundingBox;
     _lastBoundingBox = tempBoundingBox;
     return true;
+}
+
+ bool  KcfTracker::get_found(){
+  return _FOUND;
 }
 
 bool KcfTracker::evalReponse(const cv::Mat& image, const cv::Mat& response,
@@ -625,4 +624,3 @@ bool KcfTracker::detect(const cv::Mat& image, const Point& pos,
     idft(responsef, response, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
     return true;
 }
-
