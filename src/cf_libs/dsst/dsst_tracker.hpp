@@ -95,6 +95,7 @@ namespace cf_tracking {
         virtual bool update(const cv::Mat& image, cv::Rect_<int>& boundingBox);
         virtual bool updateAt(const cv::Mat& image, cv::Rect_<int>& boundingBox);
         virtual const std::string getId();
+        virtual  bool get_found();
 
     private:
         bool reinit_(const cv::Mat& image, Rect& boundingBox);
@@ -146,6 +147,7 @@ namespace cf_tracking {
         int _RESIZE_TYPE;
         bool _ORIGINAL_VERSION;
         bool _USE_CCS;
+        bool _FOUND;
     };
 }
 

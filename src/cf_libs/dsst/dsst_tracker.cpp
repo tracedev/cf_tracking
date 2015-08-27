@@ -39,10 +39,10 @@ DsstTracker::DsstTracker(DsstParameters paras)
       _MIN_AREA(10),
       _MAX_AREA_FACTOR(0.8),
       _ID("DSSTcpp"),
-      _ENABLE_TRACKING_LOSS_DETECTION(paras.enableTrackingLossDetection),
       _ORIGINAL_VERSION(paras.originalVersion),
       _RESIZE_TYPE(paras.resizeType),
-      _USE_CCS(true) {
+      _USE_CCS(true),
+      _FOUND(true) {
     if (paras.enableScaleEstimator) {
         ScaleEstimatorParas sp;
         sp.scaleCellSize = paras.scaleCellSize;
@@ -298,6 +298,10 @@ bool DsstTracker::updateAt_(const cv::Mat& image, Rect& boundingBox) {
     return isValid;
 }
 
+ bool  DsstTracker::get_found(){
+  return _FOUND;
+}
+
 bool DsstTracker::updateAtScalePos(const cv::Mat& image, const Point& oldPos, const T oldScale, Rect& boundingBox) {
     ++_frameIdx;
 
@@ -322,11 +326,8 @@ bool DsstTracker::updateAtScalePos(const cv::Mat& image, const Point& oldPos, co
     tempBoundingBox.x = newPos.x - tempBoundingBox.width / 2;
     tempBoundingBox.y = newPos.y - tempBoundingBox.height / 2;
 
-    if (_ENABLE_TRACKING_LOSS_DETECTION) {
-        if (evalReponse(image, response, maxResponseIdx,
-                        tempBoundingBox) == false)
-        { return false; }
-    }
+    _FOUND = evalReponse(image, response, maxResponseIdx, tempBoundingBox);
+
 
     if (updateModel(image, newPos, newScale) == false)
     { return false; }
