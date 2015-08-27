@@ -196,6 +196,11 @@ bool KcfTracker::reinit_(const cv::Mat& image, Rect& boundingBox) {
                                   floor((_templateSz.height - _PIXEL_PADDING) / _CELL_SIZE));
 
     _y = gaussianShapedLabelsShifted2D(outputSigma, templateSzByCells);
+    int nrows = cv::getOptimalDFTSize(_y.rows);
+    int ncols = cv::getOptimalDFTSize(_y.cols);
+    int bottom = MAX(nrows, _y.rows) - nrows;
+    int right = MAX(ncols, _y.cols) - ncols;
+    cv::copyMakeBorder(_y, _y, 0, bottom, 0, right, cv::BORDER_CONSTANT, 0);
 
     if (_USE_CCS)
     { dft(_y, _yf); }

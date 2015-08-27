@@ -131,12 +131,12 @@ namespace cf_tracking {
 
     template <class T>
     struct FhogFeatureChannels {
-        typedef FeatureChannels_ < 31, T > type;
+        typedef FeatureChannels_ < 7, T > type;
     };
 
     template <class T>
     struct DsstFeatureChannels {
-        typedef FeatureChannels_ < 28, T > type;
+        typedef FeatureChannels_ < 7, T > type;
     };
 }
 
