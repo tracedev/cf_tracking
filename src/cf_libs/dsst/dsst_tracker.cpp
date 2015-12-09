@@ -3,8 +3,8 @@
 using namespace cf_tracking;
 
 DsstParameters::DsstParameters() :
-    padding(),
-    outputSigmaFactor(),
+    padding(1.6),
+    outputSigmaFactor(0.05),
     lambda(static_cast<double>(0.01)),
     learningRate(static_cast<double>(0.012)),
     templateSize(100),
